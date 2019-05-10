@@ -1,0 +1,159 @@
+{
+    "step-types": {
+        "script-module-step": [
+            {
+                "@type-id": "custom.Feedonomics.FtpUpload",
+                "description": "Upload files to an (S)FTP server",
+                "module": "int_feedonomics/cartridge/scripts/jobsteps/FtpUpload.js",
+                "function": "Upload",
+                "parameters": {
+                    "parameters": [
+                        {
+                            "@name": "ServiceID",
+                            "@type": "string",
+                            "@required": true,
+                            "@trim": true
+                        },
+                        {
+                            "@name": "FilePattern",
+                            "@type": "string",
+                            "@required": false,
+                            "description": "File pattern (Regular Expression)",
+                            "@trim": true,
+                            "default-value": ".*\\.xml"
+                        },
+                        {
+                            "@name": "SourceFolder",
+                            "@type": "string",
+                            "@required": true,
+                            "@trim": true,
+                            "description": "Local folder with files, relative to IMPEX/",
+                            "default-value": "src/feedonomics/upload"
+                        },
+                        {
+                            "@name": "TargetFolder",
+                            "@type": "string",
+                            "@required": true,
+                            "description": "Remote folder on Server, relative to home directory",
+                            "@trim": true
+                        },
+                        {
+                            "@name": "ArchiveFolder",
+                            "@type": "string",
+                            "@required": false,
+                            "description": "Local folder where to archive files, relative to IMPEX/",
+                            "@trim": true,
+                            "default-value": "src/archive/feedonomics"
+                        },
+                        {
+                            "@name": "NoFileFoundStatus",
+                            "@type": "string",
+                            "@required": true,
+                            "@trim": true,
+                            "enum-values": {
+                                "value": [
+                                    "OK",
+                                    "ERROR"
+                                ]
+                            },
+                            "description": "Exit code in case no files were found.",
+                            "default-value": "OK"
+                        },
+                        {
+                            "@name": "IsDisabled",
+                            "description": "Mark the step as disabled. This will skip the step and returns a OK status",
+                            "@type": "boolean",
+                            "@required": false,
+                            "@trim": true
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code": "ERROR",
+                            "description": "Used when an error occurred."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when everything went well."
+                        },
+                        {
+                            "@code": "NO_FILE_FOUND",
+                            "description": "In case exit status is OK and no files were found."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id": "custom.Feedonomics.ProductExport",
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "@supports-parallel-execution": "false",
+                "module": "int_feedonomics/cartridge/scripts/jobsteps/FeedonomicsProductExport.js",
+                "function": "ExportProducts",
+                "parameters": {
+                    "parameters": [{
+                            "@name": "TargetFolder",
+                            "@type": "string",
+                            "@required": "true",
+                            "@trim": "true",
+                            "description": "Target folder path (in IMPEX)",
+                            "default-value": "src/feedonomics/catalog"
+                        },
+                        {
+                            "@name": "FileNamePrefix",
+                            "description": "Filename prefix of the generated files that will contain exported data",
+                            "@type": "string",
+                            "@required": "false",
+                            "@trim": "true",
+                            "default-value": "export-catalog"
+                        },
+                        {
+                            "@name": "OverwriteExportFile",
+                            "description": "Overwrite the file if exists",
+                            "@type": "boolean",
+                            "@required": false,
+                            "@trim": true,
+                            "default-value": "true"
+                        },
+                        {
+                            "@name": "ExportFormat",
+                            "description": "Format of the exported file(xml or csv)",
+                            "@type": "string",
+                            "@required": false,
+                            "@trim": true,
+                            "default-value": "xml"
+                        },
+                        {
+                            "@name": "IsDisabled",
+                            "description": "Mark the step as disabled. This will skip the step and returns a OK status",
+                            "@type": "boolean",
+                            "@required": false,
+                            "@trim": true
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code": "ERROR",
+                            "description": "Used when an error occurred."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when everything went well."
+                        },
+                        {
+                            "@code": "FILE_ALREADY_EXISTS",
+                            "description": "Used when a file already exists with the given filename in the given target folder and the overwrite option is not set to true."
+                        },
+                        {
+                            "@code": "NO_DATA_TO_EXPORT",
+                            "description": "Used when there is no data to export."
+                        }
+                    ]
+                }
+            }
+
+        ]
+    }
+}
