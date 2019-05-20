@@ -11,22 +11,23 @@ var HEADER_VALUES = {
     "TITLE"                   : "title",
     "DESCRIPTION"             : "description",
     "UPC"                     : "upc",
-    "IMAGE"                   : "image",
-    "PRODUCT_LINK"            : "productLink",
+    "IMAGE"                   : "image_link",
+    "PRODUCT_LINK"            : "link",
     "CATEGORY"                : "category",
-    "MASTER_PRODUCT_ID"       : "itemGroupID",
+    "MASTER_PRODUCT_ID"       : "item_group_id",
     "BRAND"                   : "brand",
     "PRICE"                   : "price",
+    "BOOKPRICE"               : "book_price",
+    "PROMOPRICE"              : "promo_price",
     "INVENTORY"               : "invetory",
-    "LIST_PRICE"              : "listPrice",
-    "SALE_PRICE"              : "salePrice",
     "IN_STOCK"                : "in_stock",
-    "ADDTIONAL_IMAGE_LINKS"   : "additional_image_links",
+    "ADDTIONAL_IMAGE_LINKS"   : "additional_image_link",
     "CUSTOM_FIELDS"           : "specifications",
-    "VARIANT_ATTRIBUTES"      : "variantJSON",
-    "PRODUCT_TYPE"            : "productType",
+    "VARIANT_ATTRIBUTES"      : "variantjson",
+    "PRODUCT_TYPE"            : "producttype",
     "MANUFACTURER_NAME"       : "manufacturer_name",
-    "MANUFACTURER_SKU"        : "manufacturer_sku"
+    "MANUFACTURER_SKU"        : "manufacturer_sku",
+    "ONLINE"                  : "online"
 };
 
 var FILE_NAME = {
@@ -39,9 +40,13 @@ var FILE_EXTENSTION = {
     "CSV" : "csv"
 }
 
+var IMAGE_TYPE = "large";
+var FILE_SEPARATOR = ",";
+
 module.exports = {
     EXPORT_TYPE      : EXPORT_TYPE,
     HEADER_VALUES    : HEADER_VALUES,
     FILE_NAME        : FILE_NAME,
-    FILE_EXTENSTION  : FILE_EXTENSTION
+    FILE_EXTENSTION  : FILE_EXTENSTION,
+    IMAGE_TYPE       : IMAGE_TYPE
 };
