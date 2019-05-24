@@ -1,14 +1,12 @@
 {
     "step-types": {
-        "script-module-step": [
-            {
+        "script-module-step": [{
                 "@type-id": "custom.Feedonomics.FtpUpload",
                 "description": "Upload files to an (S)FTP server",
                 "module": "int_feedonomics/cartridge/scripts/jobsteps/FtpUpload.js",
                 "function": "Upload",
                 "parameters": {
-                    "parameters": [
-                        {
+                    "parameters": [{
                             "@name": "ServiceID",
                             "@type": "string",
                             "@required": true,
@@ -20,7 +18,7 @@
                             "@required": false,
                             "description": "File pattern (Regular Expression)",
                             "@trim": true,
-                            "default-value": ".*\\.xml"
+                            "default-value": ".*\\.csv"
                         },
                         {
                             "@name": "SourceFolder",
@@ -28,7 +26,7 @@
                             "@required": true,
                             "@trim": true,
                             "description": "Local folder with files, relative to IMPEX/",
-                            "default-value": "src/feedonomics/upload"
+                            "default-value": "src/feedonomics/catalog"
                         },
                         {
                             "@name": "TargetFolder",
@@ -46,25 +44,12 @@
                             "default-value": "src/archive/feedonomics"
                         },
                         {
-                            "@name": "NoFileFoundStatus",
-                            "@type": "string",
-                            "@required": true,
-                            "@trim": true,
-                            "enum-values": {
-                                "value": [
-                                    "OK",
-                                    "ERROR"
-                                ]
-                            },
-                            "description": "Exit code in case no files were found.",
-                            "default-value": "OK"
-                        },
-                        {
                             "@name": "IsDisabled",
                             "description": "Mark the step as disabled. This will skip the step and returns a OK status",
                             "@type": "boolean",
                             "@required": false,
-                            "@trim": true
+                            "@trim": true,
+                            "default-value": false
                         }
                     ]
                 },
@@ -76,21 +61,24 @@
                         {
                             "@code": "OK",
                             "description": "Used when everything went well."
-                        },
-                        {
-                            "@code": "NO_FILE_FOUND",
-                            "description": "In case exit status is OK and no files were found."
                         }
                     ]
                 }
-            },
-            {
+            }
+        ],
+        "chunk-script-module-step": [{
                 "@type-id": "custom.Feedonomics.ProductExport",
                 "@supports-site-context": true,
                 "@supports-organization-context": false,
                 "@supports-parallel-execution": "false",
                 "module": "int_feedonomics/cartridge/scripts/jobsteps/FeedonomicsProductExport.js",
-                "function": "ExportProducts",
+                "before-step-function": "beforeStep",
+                "total-count-function": "getTotalCount",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "write",
+                "after-step-function": "afterStep",
+                "chunk-size": 10000,
                 "parameters": {
                     "parameters": [{
                             "@name": "TargetFolder",
@@ -109,12 +97,62 @@
                             "default-value": "export-catalog"
                         },
                         {
-                            "@name": "OverwriteExportFile",
-                            "description": "Overwrite the file if exists",
+                            "@name": "LocaleID",
+                            "description": "Locale ID otherwise default locale",
+                            "@type": "string",
+                            "@required": false,
+                            "@trim": true
+                        },
+                        {
+                            "@name": "IsDisabled",
+                            "description": "Mark the step as disabled. This will skip the step and returns a OK status",
                             "@type": "boolean",
                             "@required": false,
-                            "@trim": true,
-                            "default-value": "true"
+                            "@trim": true
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code": "ERROR",
+                            "description": "Used when an error occurred."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when everything went well."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id": "custom.Feedonomics.ProductInventoryExport",
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "@supports-parallel-execution": "false",
+                "module": "int_feedonomics/cartridge/scripts/jobsteps/FeedonomicsInventoryExport.js",
+                "before-step-function": "beforeStep",
+                "total-count-function": "getTotalCount",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "write",
+                "after-step-function": "afterStep",
+                "chunk-size": 10000,
+                "parameters": {
+                    "parameters": [{
+                            "@name": "TargetFolder",
+                            "@type": "string",
+                            "@required": "true",
+                            "@trim": "true",
+                            "description": "Target folder path (in IMPEX)",
+                            "default-value": "src/feedonomics/inventory"
+                        },
+                        {
+                            "@name": "FileNamePrefix",
+                            "description": "Filename prefix of the generated files that will contain exported data",
+                            "@type": "string",
+                            "@required": "false",
+                            "@trim": "true",
+                            "default-value": "export-inventory"
                         },
                         {
                             "@name": "ExportFormat",
@@ -141,19 +179,10 @@
                         {
                             "@code": "OK",
                             "description": "Used when everything went well."
-                        },
-                        {
-                            "@code": "FILE_ALREADY_EXISTS",
-                            "description": "Used when a file already exists with the given filename in the given target folder and the overwrite option is not set to true."
-                        },
-                        {
-                            "@code": "NO_DATA_TO_EXPORT",
-                            "description": "Used when there is no data to export."
                         }
                     ]
                 }
             }
-
         ]
     }
 }

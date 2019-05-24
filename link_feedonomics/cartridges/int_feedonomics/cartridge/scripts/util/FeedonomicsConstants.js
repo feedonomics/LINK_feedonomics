@@ -19,7 +19,7 @@ var HEADER_VALUES = {
     "PRICE"                   : "price",
     "BOOKPRICE"               : "book_price",
     "PROMOPRICE"              : "promo_price",
-    "INVENTORY"               : "invetory",
+    "INVENTORY"               : "inventory",
     "IN_STOCK"                : "in_stock",
     "ADDTIONAL_IMAGE_LINKS"   : "additional_image_link",
     "CUSTOM_FIELDS"           : "specifications",

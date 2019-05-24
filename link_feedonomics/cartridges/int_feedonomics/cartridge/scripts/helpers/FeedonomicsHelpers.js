@@ -35,39 +35,17 @@ function generateCSVHeader( exportType ) {
         csvHeaderArray.push(FConstants.HEADER_VALUES.ONLINE);
 
     } else if (exportType == FConstants.EXPORT_TYPE.INVENTORY) {
-           //TODO
+        csvHeaderArray.push(FConstants.HEADER_VALUES.ID);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.PRICE);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.BOOKPRICE);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.PROMOPRICE);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.INVENTORY);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.IN_STOCK);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.PRODUCT_TYPE);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.ONLINE);
     }
 
     return csvHeaderArray;
-}
-
-/**
-* This Function creates file name with file name prefix
-* @param {String} fileNamePrefix
-* @returns {String} fileName
-*/
-function createFileName(fileNamePrefix,fileExtension) {
-    var Calendar = require('dw/util/Calendar');
-    var Site = require('dw/system/Site');
-    var StringUtils = require('dw/util/StringUtils');
-    var DATETIME_FORMAT = 'yyyy-MM-dd_HH-mm-ss-SSS';
-
-    var calendar = new Calendar();
-    var siteID = Site.getCurrent().getID();
-    return fileNamePrefix + "_" + siteID + "_" + StringUtils.formatCalendar(calendar, DATETIME_FORMAT)+ "." + fileExtension;
-}
-
-/**
- * This function returns file extension based on parameter
- * @param {String} exportFormat Input Job Parameter
- * @returns {String} file name extension
- */
-function getFileExtension(exportFormat) {
-    if ( exportFormat && exportFormat.toLowerCase() == FConstants.FILE_EXTENSTION.XML) {
-        return FConstants.FILE_EXTENSTION.XML;
-    } else {
-        return FConstants.FILE_EXTENSTION.CSV;
-    }
 }
 
 /**
@@ -300,53 +278,90 @@ function calculatePromoPrice(product) {
  * @returns {JSON} Price Books Price
  */
 function calculatePriceBookPrices(product) {
+
+    var HashMap = require('dw/util/HashMap');
     var priceModel = product.priceModel;
     var priceInfos = priceModel.priceInfos;
-    var priceBookArray = [];
+    var priceBookMap = new HashMap();
     if (priceInfos) {
         for (var index in priceInfos) {
             var priceInfo = priceInfos[index];
             var priceBookPrice = {};
-            priceBookPrice[priceInfo.priceBook.ID] = priceInfo.price.value;
-            priceBookArray.push(priceBookPrice);
+            var priceBook = priceInfo.priceBook;
+            priceBookPrice[priceBook.ID] = priceInfo.price.value;
+            priceBookMap.put(priceBook.ID, priceBookPrice);
+            while (priceBook.parentPriceBook) {
+                priceBookPrice = {};
+                priceBook = priceBook.parentPriceBook;
+                priceBookPrice[priceBook.ID] =  priceModel.getPriceBookPrice(priceBook.ID).value;
+                priceBookMap.put(priceBook.ID, priceBookPrice);
+            }
         }
     }
-    return JSON.stringify(priceBookArray);
-}
-/**
- * This function returns file extension based on parameter
- * @param {String} exportFormat Input Job Parameter
- * @returns {String} file name extension
- */
-/*function createLocaleSpecificValue(product) {
-    var json = {};
-    var Site = require('dw/system/Site');
-    var Template = require('dw/util/Template');
-    var params = new dw.util.HashMap();
-    params.put('product',product)
-    var localeItr = Site.getAllowedLocales().iterator();
-    while (localeItr.hasNext()) {
-        var localeId = localeItr.next().ID;
-        new Template('localespecificvalue',localeId).render(params).getText();
+    if (priceBookMap.values().length > 0) {
+        return JSON.stringify(priceBookMap.values().toArray());
     }
-}*/
+    return "N/A";
+}
 
+/**
+ * Calculate All PriceBooks Price
+ * @param {dw.catalog.Product} Product
+ * @returns {JSON} Site ALL Price Books Price
+ */
+function calculateAllPriceBooksPrices(product) {
+
+    var priceBookMgr = require('dw/catalog/PriceBookMgr');
+    var priceModel = product.priceModel;
+    var priceBookArray = [];
+    var siteAllPriceBooks = priceBookMgr.getSitePriceBooks().iterator();
+    while (siteAllPriceBooks.hasNext()) {
+        var priceBook = siteAllPriceBooks.next();
+        var priceBookPrice = {};
+        priceBookPrice[priceBook.ID] =  priceModel.getPriceBookPrice(priceBook.ID).value;
+        priceBookArray.push(priceBookPrice);
+    }
+    return priceBookArray.length > 0 ? JSON.stringify(priceBookArray) : "N/A";
+}
+
+/**
+ * Sets locale of the request
+ * @param localeID
+ */
+function setLocale(localeID) {
+    if(localeID){
+        var localeExist = false;
+        var Site = require('dw/system/Site')
+        var locales = Site.getCurrent().getAllowedLocales().iterator();
+        while (locales.hasNext()) {
+            var locale = locales.next();
+            if (locale === localeID) {
+                request.setLocale(localeID); // eslint-disable-line no-undef
+                localeExist = true;
+                break;
+            }
+        }
+        if (!localeExist) {
+            throw new Error('Locale ID does not exist');
+        }
+    }
+}
 
 module.exports = {
-    generateCSVHeader        : generateCSVHeader,
-    createFileName           : createFileName,
-    getFileExtension         : getFileExtension,
-    getProductImage          : getProductImage,
-    getOnlineSubCats         : getOnlineSubCats,
-    getMasterID              : getMasterID,
-    getATSValue              : getATSValue,
-    getAllCustomProps        : getAllCustomProps,
-    getAllVariationAttrs     : getAllVariationAttrs,
-    getAllProductTypes       : getAllProductTypes,
-    getAllImages             : getAllImages,
-    getDescription           : getDescription,
-    getOnlineStatus          : getOnlineStatus,
-    getAvailabilityStatus    : getAvailabilityStatus,
-    calculatePromoPrice      : calculatePromoPrice,
-    calculatePriceBookPrices : calculatePriceBookPrices
+    generateCSVHeader            : generateCSVHeader,
+    getProductImage              : getProductImage,
+    getOnlineSubCats             : getOnlineSubCats,
+    getMasterID                  : getMasterID,
+    getATSValue                  : getATSValue,
+    getAllCustomProps            : getAllCustomProps,
+    getAllVariationAttrs         : getAllVariationAttrs,
+    getAllProductTypes           : getAllProductTypes,
+    getAllImages                 : getAllImages,
+    getDescription               : getDescription,
+    getOnlineStatus              : getOnlineStatus,
+    getAvailabilityStatus        : getAvailabilityStatus,
+    calculatePromoPrice          : calculatePromoPrice,
+    calculatePriceBookPrices     : calculatePriceBookPrices,
+    calculateAllPriceBooksPrices : calculateAllPriceBooksPrices,
+    setLocale                    : setLocale
 };

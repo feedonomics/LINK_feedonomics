@@ -1,4 +1,4 @@
-/* Feedonomics Product Export Job */
+/* Feedonomics Inventory Export Job */
 'use strict';
 
 var Logger = require('dw/system/Logger');
@@ -6,62 +6,25 @@ var Status = require('dw/system/Status');
 var File = require('dw/io/File');
 
 var FeedonomicsHelpers = require('~/cartridge/scripts/helpers/FeedonomicsHelpers');
-var FileUtils = require('~/cartridge/scripts/util/FileUtils');
 var FConstants = require('~/cartridge/scripts/util/FeedonomicsConstants');
 
 var productsIter;
 var fileWriter;
 var headerColumn;
 var csvWriter;
+var processedAll = true;
 
 /**
- * Adds the column value to the CSV line Array of Product Feed export CSV file
+ * Adds the column value to the CSV line Array of Inventory Feed export CSV file
  * @param {dw.catalog.Product} product - SFCC Product
  * @param {Object} columnValue - Catalog Feed Column
  * @param {Array} csvProductArray - CSV  Array
  */
-function writeProductExportField(product,csvProductArray,columnValue) {
+function writeInventoryExportField(product,csvProductArray,columnValue) {
     switch (columnValue) {
         // Product ID
         case FConstants.HEADER_VALUES.ID:
             csvProductArray.push(product.ID || "");
-            break;
-        // Product Name
-        case FConstants.HEADER_VALUES.NAME:
-            csvProductArray.push(product.name || "");
-            break;
-        // Product Page Title
-        case FConstants.HEADER_VALUES.TITLE:
-            csvProductArray.push(product.pageTitle || "");
-            break;
-        // Product Description
-        case FConstants.HEADER_VALUES.DESCRIPTION:
-            csvProductArray.push(FeedonomicsHelpers.getDescription(product));
-            break;
-        // Product UPC
-        case FConstants.HEADER_VALUES.UPC:
-            csvProductArray.push(product.UPC || "");
-            break;
-        // Product Image
-        case FConstants.HEADER_VALUES.IMAGE:
-            csvProductArray.push(FeedonomicsHelpers.getProductImage(product) || "");
-            break;
-        // Product Link
-        case FConstants.HEADER_VALUES.PRODUCT_LINK:
-            var URLUtils = require('dw/web/URLUtils');
-            csvProductArray.push(URLUtils.abs('Product-Show', 'pid', product.ID).toString());
-            break;
-        // Product Categories
-        case FConstants.HEADER_VALUES.CATEGORY:
-            csvProductArray.push(FeedonomicsHelpers.getOnlineSubCats(product));
-            break;
-        // Product's Master Product ID
-        case FConstants.HEADER_VALUES.MASTER_PRODUCT_ID:
-            csvProductArray.push(FeedonomicsHelpers.getMasterID(product));
-            break;
-        // Product's Brand
-        case FConstants.HEADER_VALUES.BRAND:
-            csvProductArray.push(product.brand);
             break;
         // Product's Base Price
         case FConstants.HEADER_VALUES.PRICE:
@@ -71,41 +34,21 @@ function writeProductExportField(product,csvProductArray,columnValue) {
         case FConstants.HEADER_VALUES.INVENTORY:
             csvProductArray.push(FeedonomicsHelpers.getATSValue(product));
             break;
-        // ProductName
+        // Product's Price BOOK Prices
         case FConstants.HEADER_VALUES.BOOKPRICE:
-            csvProductArray.push(FeedonomicsHelpers.calculatePriceBookPrices(product));
+            csvProductArray.push(FeedonomicsHelpers.calculateAllPriceBooksPrices(product));
             break;
-        // ProductName
+        // Product's Promotional Price
         case FConstants.HEADER_VALUES.PROMOPRICE:
             csvProductArray.push(FeedonomicsHelpers.calculatePromoPrice(product));
             break;
-        // ProductName
+        // Product's In Stock
         case FConstants.HEADER_VALUES.IN_STOCK:
             csvProductArray.push(FeedonomicsHelpers.getAvailabilityStatus(product));
-            break;
-        // ProductName
-        case FConstants.HEADER_VALUES.ADDTIONAL_IMAGE_LINKS:
-            csvProductArray.push(FeedonomicsHelpers.getAllImages(product));
-            break;
-        // Product's Custom Attributes JSON
-        case FConstants.HEADER_VALUES.CUSTOM_FIELDS:
-            csvProductArray.push(FeedonomicsHelpers.getAllCustomProps(product));
-            break;
-        // Product's Variation Attributes JSON
-        case FConstants.HEADER_VALUES.VARIANT_ATTRIBUTES:
-            csvProductArray.push(FeedonomicsHelpers.getAllVariationAttrs(product));
             break;
         // Product's ALL Type
         case FConstants.HEADER_VALUES.PRODUCT_TYPE:
             csvProductArray.push(FeedonomicsHelpers.getAllProductTypes(product));
-            break;
-        // Product's Manufacturer Name
-        case FConstants.HEADER_VALUES.MANUFACTURER_NAME:
-            csvProductArray.push(product.manufacturerName || "");
-            break;
-        // Product's Manufacturer SKU
-        case FConstants.HEADER_VALUES.MANUFACTURER_SKU:
-            csvProductArray.push(product.manufacturerSKU || "");
             break;
         // Product's Online Status
         case FConstants.HEADER_VALUES.ONLINE:
@@ -117,21 +60,24 @@ function writeProductExportField(product,csvProductArray,columnValue) {
     }
 }
 
+/**
+ * Executed Before Processing of Chunk
+ */
 exports.beforeStep = function() {
     var args = arguments[0];
-    var targetFolder = args.TargetFolder;
-    FeedonomicsHelpers.setLocale(args.LocaleID);
 
     if (args.isDisabled) {
         return new Status(Status.OK, 'OK', 'Step disabled, skip it...');
     }
+
+    var targetFolder = args.TargetFolder;
 
     if (!targetFolder) {
         return new Status(Status.ERROR, 'ERROR', 'One or more mandatory parameters are missing.');
     }
     var FileWriter = require('dw/io/FileWriter');
     var CSVStreamWriter = require('dw/io/CSVStreamWriter');
-    var fileName = FileUtils.createFileName((args.FileNamePrefix || FConstants.FILE_NAME.CATALOG));
+    var fileName = FeedonomicsHelpers.createFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
     var folderFile = new File(File.getRootDirectory(File.IMPEX),targetFolder);
     if (!folderFile.exists() && !folderFile.mkdirs()) {
         return new Status(Status.ERROR,'Cannot create IMPEX folders {0}', (File.getRootDirectory(File.IMPEX).fullPath + args.TargetFolder));
@@ -140,7 +86,7 @@ exports.beforeStep = function() {
     fileWriter = new FileWriter(csvFile);
     csvWriter = new CSVStreamWriter(fileWriter);
     //Push Header
-    headerColumn = FeedonomicsHelpers.generateCSVHeader(FConstants.EXPORT_TYPE.CATALOG);
+    headerColumn = FeedonomicsHelpers.generateCSVHeader(FConstants.EXPORT_TYPE.INVENTORY);
     csvWriter.writeNext(headerColumn);
     //Push Products
     var ProductMgr = require('dw/catalog/ProductMgr');
@@ -160,11 +106,17 @@ exports.read = function() {
 }
 
 exports.process = function( product ) {
-     var csvProductArray = [];
-     headerColumn.forEach(function (columnValue) { //eslint-disable-line
-         writeProductExportField(this,csvProductArray,columnValue);
-     },product);
-     return csvProductArray;
+     try {
+         var csvProductArray = [];
+         headerColumn.forEach(function (columnValue) { //eslint-disable-line
+           writeInventoryExportField(this,csvProductArray,columnValue);
+         },product);
+         return csvProductArray;
+     } catch (ex) {
+          processedAll = false;
+          Logger.info("Not able to process product {0} having error : {1}", product.ID, ex.toString());
+     }
+
 }
 
 exports.write = function(lines) {
@@ -178,5 +130,9 @@ exports.afterStep = function() {
     fileWriter.flush();
     csvWriter.close();
     fileWriter.close();
-    return new Status(Status.OK);
+    if (processedAll) {
+        return new Status(Status.OK);
+    } else {
+        return new Status(Status.ERROR);
+    }
 }
