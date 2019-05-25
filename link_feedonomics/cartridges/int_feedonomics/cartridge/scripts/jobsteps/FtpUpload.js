@@ -8,27 +8,24 @@ var FeedonomicsFTPService = require('~/cartridge/scripts/init/FeedonomicsFTPServ
 var FileUtils = require('~/cartridge/scripts/util/FileUtils');
 
 /**
- * Copies files to a remote (S)FTP-Location
- *
- * Job Parameters:
- *
- *   ServiceID: String The service ID to use to connect to the remote server.
- *   FilePattern: String Input File pattern to search in local folder (default is  (*.csv)).
- *   SourceFolder: String Local folder in which will placed files, relatively to IMPEX/.
- *   TargetFolder: String Remote folder of FTP Server.
- *   ArchiveFolder: String Path to the archive folder. If empty, nothing will be done for uploaded files (keep files as is).
- */
+ *   Copies files to a remote (S)FTP-Location
+ *   @param FilePattern: String Input File pattern (default is  (*.csv)).
+ *   @param TargetFolder: String Remote folder of FTP Server.
+*   @param SourceFolder: String Local folder relatively to IMPEX/.
+ *   @param ArchiveFolder: String Archive folder path.
+ *   @param ServiceID: String The service ID used to connect to the ftp server.
+*/
 
 /**
- * The main function to upload files from IMPEX to SFTP
+ * Uploads files from IMPEX to SFTP/FTP
  *
- * @returns {dw.system.Status} The exit status for the job step
+ * @returns {dw.system.Status} OK || ERROR
  */
 var upload = function upload() {
     var args = arguments[0];
 
     if (args.isDisabled) {
-        return new Status(Status.OK, 'OK', 'Step disabled, skip it...');
+        return new Status(Status.OK, 'OK', 'Step Skipped');
     }
 
     // Load input Parameters
@@ -39,12 +36,12 @@ var upload = function upload() {
     var archiveFolder = args.ArchiveFolder;
 
     // Test mandatory parameters
-    if (empty(serviceID) || empty(sourceFolder) || empty(targetFolder)) {
-        return new Status(Status.ERROR, 'ERROR', 'One or more mandatory parameters are missing.');
+    if (serviceID || sourceFolder || targetFolder) {
+        return new Status(Status.ERROR, 'ERROR', 'Parameters are missing.');
     }
 
     var sourceDirectory = File.IMPEX + (sourceFolder.charAt(0).equals(File.SEPARATOR) ? sourceFolder + File.SEPARATOR : File.SEPARATOR + sourceFolder);
-    var fileList = FileUtils.getFiles(sourceDirectory, filePattern);
+    var fileList = FileUtils.getExistingFiles(sourceDirectory, filePattern);
     if (fileList.length === 0) {
         return new Status(Status.ERROR, 'ERROR', 'No files to upload.');
     }
@@ -52,7 +49,7 @@ var upload = function upload() {
     archiveFolder = (archiveFolder.charAt(0).equals(File.SEPARATOR) ? archiveFolder.substring(1) : archiveFolder);
     var archiveFolderFile = new File(File.getRootDirectory(File.IMPEX), archiveFolder);
     if (!archiveFolderFile || (!archiveFolderFile.isDirectory() && !archiveFolderFile.mkdirs())) {
-        throw new Error('Cannot create IMPEX Archive folder: ' + archiveFolder + '!');
+        throw new Error('Can not create IMPEX Archive folder: ' + archiveFolder + '!');
     }
 
     targetFolder = targetFolder.charAt(targetFolder.length - 1).equals(File.SEPARATOR) ? targetFolder : targetFolder + File.SEPARATOR;
@@ -61,12 +58,13 @@ var upload = function upload() {
 
     var targetFolderStr = targetFolder.charAt(0) === File.SEPARATOR ? targetFolder.substring(1) : targetFolder;
 
+    var isRemoteDirExist = ftpService.call('cd', targetFolderStr);
     // Creating FTP Folder Directory if doesn't exist
-    if (!ftpService.call('cd', targetFolderStr)) {
-        Logger.info('Directory "{0}" does not exist. Creating...', targetFolderStr);
+    if (!isRemoteDirExist || !isRemoteDirExist.getObject().isOk()) {
+        Logger.info('folder "{0}" does not exist.Creating the folder', targetFolderStr);
         ftpService.call('mkdir', targetFolderStr);
         if (!ftpService.call('cd', targetFolderStr)) {
-            throw new Error('Could not change to target folder.');
+            throw new Error('Not able to change to target folder.');
         }
     }
 
@@ -82,7 +80,7 @@ var upload = function upload() {
         }
         Logger.info('File {0} successfully uploaded.', remoteFilePath);
 
-        if (!empty(archiveFolderFile)) {
+        if (archiveFolderFile) {
             var theArchiveFile = new File(archiveFolderFile.fullPath + File.SEPARATOR + file.getName());
             file.renameTo(theArchiveFile);
         }

@@ -82,7 +82,12 @@ function getOnlineSubCats(product) {
     var categoriesItr = onlineCategories.iterator();
     while (categoriesItr.hasNext()) {
         var category = categoriesItr.next();
-        catArray.push(category.ID);
+        var categoryBreadcrumb = category.displayName;
+        while (category.parent && category.parent.ID !== 'root') {
+            category = category.parent;
+            categoryBreadcrumb = categoryBreadcrumb + ">" + category.displayName;
+        }
+        catArray.push(categoryBreadcrumb);
     }
     return catArray.join(FConstants.FILE_SEPARATOR);
 }
@@ -145,7 +150,7 @@ function getAllVariationAttrs(product) {
     if (variationAttrs && ( product.isVariant() || product.isVariationGroup())) {
         Object.keys(variationAttrs).forEach(function(key) {
             var varValue = this.getVariationValue(product, variationAttrs[key]);
-            customJSON[variationAttrs[key].attributeID] = varValue ? varValue.value.toString() : "";
+            customJSON[variationAttrs[key].attributeID] = varValue ? varValue.displayValue : "";
         }, pvm);
         return JSON.stringify(customJSON);
     } else if (variationAttrs && product.isMaster()){
@@ -153,7 +158,7 @@ function getAllVariationAttrs(product) {
             var attrValueArray = [];
             var attrValues = this.getAllValues(variationAttrs[index1])
             Object.keys(attrValues).forEach(function(index2){
-                this.push(attrValues[index2].value.toString());
+                this.push(attrValues[index2].displayValue);
             },attrValueArray);
             customJSON[variationAttrs[index1].attributeID] = attrValueArray.join(FConstants.FILE_SEPARATOR);
         }, pvm);
@@ -252,7 +257,6 @@ function getAvailabilityStatus(product) {
  * @returns {Number} N/A or Price
  */
 function calculatePromoPrice(product) {
-    var Money = require('dw/value/Money');
     var PromotionMgr = require('dw/campaign/PromotionMgr');
     var promoPrice = "N/A";
     var PROMOTION_CLASS_PRODUCT = require('dw/campaign/Promotion').PROMOTION_CLASS_PRODUCT;
@@ -261,9 +265,16 @@ function calculatePromoPrice(product) {
     if (promotions && promotions.length>0) {
         for (var index in promotions) {
             var promo = promotions[index];
-            if (promo.getPromotionClass() != null && promo.getPromotionClass().equals(PROMOTION_CLASS_PRODUCT)) {
+            if (promo.getPromotionClass() != null && promo.getPromotionClass().equals(PROMOTION_CLASS_PRODUCT)
+                && (promo.isBasedOnCustomerGroups() && !promo.basedOnCoupons && !promo.basedOnSourceCodes)) {
                 var promoPriceObj = {};
-                promoPriceObj[promo.ID] = promo.getPromotionalPrice(product).value;
+                var tempPrice = 0;
+                if(product.optionProduct){
+                    tempPrice = promo.getPromotionalPrice(product, product.getOptionModel());
+                } else {
+                    tempPrice = promo.getPromotionalPrice(product);
+                }
+                promoPriceObj[promo.ID] = tempPrice > 0 ? tempPrice : "N/A";
                 promoPriceArray.push(promoPriceObj);
             }
         }

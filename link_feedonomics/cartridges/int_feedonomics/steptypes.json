@@ -76,6 +76,7 @@
                 "total-count-function": "getTotalCount",
                 "read-function": "read",
                 "process-function": "process",
+                "after-chunk-function":"afterChunk",
                 "write-function": "write",
                 "after-step-function": "afterStep",
                 "chunk-size": 10000,
@@ -136,6 +137,7 @@
                 "process-function": "process",
                 "write-function": "write",
                 "after-step-function": "afterStep",
+                "after-chunk-function":"afterChunk",
                 "chunk-size": 10000,
                 "parameters": {
                     "parameters": [{

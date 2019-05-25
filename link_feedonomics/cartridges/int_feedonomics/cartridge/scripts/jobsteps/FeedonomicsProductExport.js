@@ -13,6 +13,8 @@ var productsIter;
 var fileWriter;
 var headerColumn;
 var csvWriter;
+var chunks = 0;
+var processedAll = true;
 
 /**
  * Adds the column value to the CSV line Array of Product Feed export CSV file
@@ -79,11 +81,11 @@ function writeProductExportField(product,csvProductArray,columnValue) {
         case FConstants.HEADER_VALUES.PROMOPRICE:
             csvProductArray.push(FeedonomicsHelpers.calculatePromoPrice(product));
             break;
-        // ProductName
+        // Product's In Stock Status
         case FConstants.HEADER_VALUES.IN_STOCK:
             csvProductArray.push(FeedonomicsHelpers.getAvailabilityStatus(product));
             break;
-        // ProductName
+        // Product's Top 10 Images
         case FConstants.HEADER_VALUES.ADDTIONAL_IMAGE_LINKS:
             csvProductArray.push(FeedonomicsHelpers.getAllImages(product));
             break;
@@ -117,6 +119,9 @@ function writeProductExportField(product,csvProductArray,columnValue) {
     }
 }
 
+/**
+ * Executed Before Processing of Chunk and Validates all required fields
+ */
 exports.beforeStep = function() {
     var args = arguments[0];
     var targetFolder = args.TargetFolder;
@@ -147,36 +152,70 @@ exports.beforeStep = function() {
     productsIter = ProductMgr.queryAllSiteProducts();
 }
 
+/**
+ * Executed Before Processing of Chunk and Return total products processed
+ * @returns {Number} products count
+ */
 exports.getTotalCount = function() {
     Logger.info("Processed products {0}", productsIter.count);
     return productsIter.count;
 }
 
-
+/**
+ * Returns a single product to processed
+ * @returns {dw.catalog.Product} product
+ */
 exports.read = function() {
     if( productsIter.hasNext() ) {
         return productsIter.next();
     }
 }
 
+/**
+ * Process product and returns required field in array
+ * @returns {Array} csvProductArray
+ */
 exports.process = function( product ) {
-     var csvProductArray = [];
-     headerColumn.forEach(function (columnValue) { //eslint-disable-line
-         writeProductExportField(this,csvProductArray,columnValue);
-     },product);
-     return csvProductArray;
+     try {
+         var csvProductArray = [];
+         headerColumn.forEach(function (columnValue) { //eslint-disable-line
+             writeProductExportField(this,csvProductArray,columnValue);
+         },product);
+         return csvProductArray;
+     } catch (ex) {
+          processedAll = false;
+          Logger.info("Not able to process product {0} having error : {1}", product.ID, ex.toString());
+     }
 }
 
+/**
+ * Writes a single product to file
+ */
 exports.write = function(lines) {
     for (var i = 0; i < lines.size(); i++ ) {
         csvWriter.writeNext(lines.get(i).toArray());
     }
 }
 
+/**
+ * Executes after processing of every chunk
+ */
+exports.afterChunck = function() {
+    chunks++;
+    Logger.info("Chunk {0} having processed successfully", chunks);
+}
+
+/**
+ * Executes after processing all the chunk and returns the status
+ * @returns {dw.system.Status} OK || ERROR
+ */
 exports.afterStep = function() {
     productsIter.close();
     fileWriter.flush();
     csvWriter.close();
     fileWriter.close();
-    return new Status(Status.OK);
-}
+    if (processedAll) {
+        return new Status(Status.OK);
+    } else {
+        return new Status(Status.ERROR);
+    }}

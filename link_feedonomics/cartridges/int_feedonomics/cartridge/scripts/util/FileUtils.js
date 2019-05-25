@@ -1,34 +1,6 @@
 var File = require('dw/io/File');
 var FConstants = require('~/cartridge/scripts/util/FeedonomicsConstants');
 
-
-/**
- * Loads files from a given directory that match the given pattern
- * Non recursive.
- * Throws Exception if directory does not exist.
- *
- * @param {String} directoryPath (Absolute) Directory path to load from
- * @param {String} filePattern RegEx pattern that the filenames must match
- *
- * @returns {Array}
- */
-function getFiles (directoryPath, filePattern) {
-    var directory = new File(directoryPath);
-
-    // We only want existing directories
-    if (!directory.isDirectory()) {
-        throw new Error('Source folder does not exist.');
-    }
-
-    var files = directory.list();
-
-    return files.filter(function (filePath) {
-        return empty(filePattern) || (!empty(filePattern) && filePath.match(filePattern) !== null);
-    }).map(function (filePath) {
-        return directoryPath + File.SEPARATOR + filePath;
-    });
-}
-
 /**
 * This Function creates file name with file name prefix
 * @param {String} fileNamePrefix
@@ -42,6 +14,30 @@ function createFileName(fileNamePrefix, fileExtension) {
        fileExtension = FConstants.FILE_EXTENSTION.CSV;
     }
     return fileNamePrefix + "_" + siteID + "_" + locale + "." + fileExtension;
+}
+
+/**
+ * Loads files from a given directory that match the given pattern
+ *
+ * @param {String} sourceFolder Directory path to load from
+ * @param {String} filePattern RegEx pattern that the filenames must match
+ *
+ * @returns {Array}
+ */
+function getExistingFiles (sourceFolder, filePattern) {
+    var directory = new File(sourceFolder);
+
+    if (!directory.isDirectory()) {
+        throw new Error('Source Folder is not available.Please provide valid one.');
+    }
+
+    var exitingFiles = directory.list();
+
+    return exitingFiles.filter(function (path) {
+        return empty(filePattern) || (!empty(filePattern) && path.match(filePattern) !== null);
+    }).map(function (path) {
+        return sourceFolder + File.SEPARATOR + path;
+    });
 }
 
 /**
@@ -59,6 +55,6 @@ function getFileExtension(exportFormat) {
 
 module.exports = {
     createFileName     : createFileName,
-    getFiles           : getFiles,
+    getExistingFiles   : getExistingFiles,
     getFileExtension   : getFileExtension
 };
