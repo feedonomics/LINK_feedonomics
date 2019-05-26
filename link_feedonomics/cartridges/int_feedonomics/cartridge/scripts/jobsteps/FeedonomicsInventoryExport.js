@@ -6,6 +6,7 @@ var Status = require('dw/system/Status');
 var File = require('dw/io/File');
 
 var FeedonomicsHelpers = require('~/cartridge/scripts/helpers/FeedonomicsHelpers');
+var FileUtils = require('~/cartridge/scripts/util/FileUtils');
 var FConstants = require('~/cartridge/scripts/util/FeedonomicsConstants');
 
 var productsIter;
@@ -78,7 +79,7 @@ exports.beforeStep = function() {
     }
     var FileWriter = require('dw/io/FileWriter');
     var CSVStreamWriter = require('dw/io/CSVStreamWriter');
-    var fileName = FeedonomicsHelpers.createFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
+    var fileName = FileUtils.createFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
     var folderFile = new File(File.getRootDirectory(File.IMPEX),targetFolder);
     if (!folderFile.exists() && !folderFile.mkdirs()) {
         return new Status(Status.ERROR,'Cannot create IMPEX folders {0}', (File.getRootDirectory(File.IMPEX).fullPath + args.TargetFolder));
@@ -142,7 +143,7 @@ exports.write = function(lines) {
 /**
  * Executes after processing of every chunk
  */
-exports.afterChunck = function() {
+exports.afterChunk = function() {
     chunks++;
     Logger.info("Chunk {0} having processed successfully", chunks);
 }

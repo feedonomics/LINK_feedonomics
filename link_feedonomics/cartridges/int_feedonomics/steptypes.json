@@ -10,7 +10,8 @@
                             "@name": "ServiceID",
                             "@type": "string",
                             "@required": true,
-                            "@trim": true
+                            "@trim": true,
+                            "default-value": "feedonomics.ftp"
                         },
                         {
                             "@name": "FilePattern",
@@ -155,14 +156,6 @@
                             "@required": "false",
                             "@trim": "true",
                             "default-value": "export-inventory"
-                        },
-                        {
-                            "@name": "ExportFormat",
-                            "description": "Format of the exported file(xml or csv)",
-                            "@type": "string",
-                            "@required": false,
-                            "@trim": true,
-                            "default-value": "xml"
                         },
                         {
                             "@name": "IsDisabled",

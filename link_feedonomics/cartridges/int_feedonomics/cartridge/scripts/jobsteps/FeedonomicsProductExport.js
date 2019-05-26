@@ -200,7 +200,7 @@ exports.write = function(lines) {
 /**
  * Executes after processing of every chunk
  */
-exports.afterChunck = function() {
+exports.afterChunk = function() {
     chunks++;
     Logger.info("Chunk {0} having processed successfully", chunks);
 }
