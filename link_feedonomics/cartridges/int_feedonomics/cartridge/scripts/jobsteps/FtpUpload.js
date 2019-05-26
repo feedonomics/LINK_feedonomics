@@ -24,7 +24,7 @@ var FileUtils = require('~/cartridge/scripts/util/FileUtils');
 var upload = function upload() {
     var args = arguments[0];
 
-    if (args.isDisabled) {
+    if (args.IsDisabled) {
         return new Status(Status.OK, 'OK', 'Step Skipped');
     }
 
@@ -36,7 +36,7 @@ var upload = function upload() {
     var archiveFolder = args.ArchiveFolder;
 
     // Test mandatory parameters
-    if (serviceID || sourceFolder || targetFolder) {
+    if (!serviceID || !sourceFolder || !targetFolder) {
         return new Status(Status.ERROR, 'ERROR', 'Parameters are missing.');
     }
 
@@ -60,7 +60,7 @@ var upload = function upload() {
 
     var isRemoteDirExist = ftpService.call('cd', targetFolderStr);
     // Creating FTP Folder Directory if doesn't exist
-    if (!isRemoteDirExist || !isRemoteDirExist.getObject().isOk()) {
+    if (!isRemoteDirExist.ok) {
         Logger.info('folder "{0}" does not exist.Creating the folder', targetFolderStr);
         ftpService.call('mkdir', targetFolderStr);
         if (!ftpService.call('cd', targetFolderStr)) {

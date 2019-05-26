@@ -127,10 +127,6 @@ exports.beforeStep = function() {
     var targetFolder = args.TargetFolder;
     FeedonomicsHelpers.setLocale(args.LocaleID);
 
-    if (args.isDisabled) {
-        return new Status(Status.OK, 'OK', 'Step disabled, skip it...');
-    }
-
     if (!targetFolder) {
         return new Status(Status.ERROR, 'ERROR', 'One or more mandatory parameters are missing.');
     }

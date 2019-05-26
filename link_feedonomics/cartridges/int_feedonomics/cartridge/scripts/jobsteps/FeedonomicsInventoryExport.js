@@ -68,10 +68,6 @@ function writeInventoryExportField(product,csvProductArray,columnValue) {
 exports.beforeStep = function() {
     var args = arguments[0];
 
-    if (args.isDisabled) {
-        return new Status(Status.OK, 'OK', 'Step disabled, skip it...');
-    }
-
     var targetFolder = args.TargetFolder;
 
     if (!targetFolder) {
