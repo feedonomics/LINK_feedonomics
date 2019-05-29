@@ -87,7 +87,6 @@ var upload = function upload() {
     });
 
     return new Status(Status.OK, 'OK', 'Upload successful.');
-
 };
 
 exports.Upload = upload;

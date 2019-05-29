@@ -99,6 +99,14 @@
                             "default-value":"export-catalog"
                         },
                         {
+                            "@name":"SkipMaster",
+                            "description":"Flag to Skip Master Products",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"true"
+                        },
+                        {
                             "@name":"LocaleID",
                             "description":"Locale ID otherwise default locale",
                             "@type":"string",
@@ -156,6 +164,14 @@
                             "@required":"false",
                             "@trim":"true",
                             "default-value":"export-inventory"
+                        },
+                        {
+                            "@name":"SkipMaster",
+                            "description":"Flag to Skip Master Products",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"true"
                         }
                     ]
                 },
