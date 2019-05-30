@@ -9,16 +9,15 @@ var FileUtils = require('~/cartridge/scripts/util/FileUtils');
 
 /**
  *   Copies files to a remote (S)FTP-Location
- *   @param FilePattern: String Input File pattern (default is  (*.csv)).
+ *   @param FilePattern: String Input File pattern (default is (*.csv)).
  *   @param TargetFolder: String Remote folder of FTP Server.
-*   @param SourceFolder: String Local folder relatively to IMPEX/.
+ *   @param SourceFolder: String Local folder relatively to IMPEX/.
  *   @param ArchiveFolder: String Archive folder path.
  *   @param ServiceID: String The service ID used to connect to the ftp server.
 */
 
 /**
  * Uploads files from IMPEX to SFTP/FTP
- *
  * @returns {dw.system.Status} OK || ERROR
  */
 var upload = function upload() {

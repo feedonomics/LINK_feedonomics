@@ -1,16 +1,16 @@
 'use strict';
 
-var FConstants = require('~/cartridge/scripts/util/FeedonomicsConstants')
+var FConstants = require('~/cartridge/scripts/util/FeedonomicsConstants');
 
 /**
-* This Function generates header for csv file
-* @param exportType Export Type Catalog or Inventory
-* @returns {Array} Header Values Array for CSV file
-*/
-function generateCSVHeader( exportType ) {
+ * This Function generates header for csv file
+ * @param {string} exportType Export Type Catalog or Inventory
+ * @returns {Array} Header Values Array for CSV file
+ */
+function generateCSVHeader(exportType) {
     var csvHeaderArray = [];
 
-    if (exportType == FConstants.EXPORT_TYPE.CATALOG) {
+    if (exportType === FConstants.EXPORT_TYPE.CATALOG) {
         csvHeaderArray.push(FConstants.HEADER_VALUES.ID);
         csvHeaderArray.push(FConstants.HEADER_VALUES.NAME);
         csvHeaderArray.push(FConstants.HEADER_VALUES.TITLE);
@@ -33,8 +33,7 @@ function generateCSVHeader( exportType ) {
         csvHeaderArray.push(FConstants.HEADER_VALUES.MANUFACTURER_NAME);
         csvHeaderArray.push(FConstants.HEADER_VALUES.MANUFACTURER_SKU);
         csvHeaderArray.push(FConstants.HEADER_VALUES.ONLINE);
-
-    } else if (exportType == FConstants.EXPORT_TYPE.INVENTORY) {
+    } else if (exportType === FConstants.EXPORT_TYPE.INVENTORY) {
         csvHeaderArray.push(FConstants.HEADER_VALUES.ID);
         csvHeaderArray.push(FConstants.HEADER_VALUES.PRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.BOOKPRICE);
@@ -65,12 +64,12 @@ function getProductImage(product) {
 /**
  * Gets Product Assigned Categories
  * @param {dw.catalog.Product} product - Product
- * @returns {String} - Product's categories in JSON string
+ * @returns {string} Product's categories in JSON string
  */
 function getOnlineSubCats(product) {
     var onlineCategories = product.getOnlineCategories();
-    if (onlineCategories.length==0) {
-        if (product.isVariant) {
+    if (onlineCategories.length === 0) {
+        if (product.isVariant()) {
             var pvm = product.variationModel;
             if (pvm) {
                 var masterProduct = pvm.getMaster();
@@ -85,7 +84,7 @@ function getOnlineSubCats(product) {
         var categoryBreadcrumb = category.displayName;
         while (category.parent && category.parent.ID !== 'root') {
             category = category.parent;
-            categoryBreadcrumb = categoryBreadcrumb + ">" + category.displayName;
+            categoryBreadcrumb = categoryBreadcrumb + ' > ' + category.displayName;
         }
         catArray.push(categoryBreadcrumb);
     }
@@ -95,20 +94,20 @@ function getOnlineSubCats(product) {
 /**
  * Return Master Product ID of the Variant
  * @param {dw.catalog.Product} product - Product
- * @returns {String} - Product's Master Id
+ * @returns {string} - Product's Master Id
  */
 function getMasterID(product) {
-    if ( product.isVariant() ) {
+    if (product.isVariant()) {
         var pvm = product.getVariationModel();
-        return pvm ? pvm.getMaster().ID : "";
+        return pvm ? pvm.getMaster().ID : '';
     }
-    return "";
+    return '';
 }
 
 /**
  * Return Product's ATS value
  * @param {dw.catalog.Product} product - Product
- * #returns {Number} Product's ATS value
+ * @returns {number} Product's ATS value
  */
 function getATSValue(product) {
     var avm = product.availabilityModel;
@@ -118,114 +117,116 @@ function getATSValue(product) {
             return 999999;
         } else if (inventoryRecord && inventoryRecord.ATS) {
             return inventoryRecord.ATS.value;
-        } else {
-            return new Number(0);
         }
     }
-    return new Number(0);
+    return 0;
 }
 
 /**
  * Returns all custom properties in JSON format
- * @param {dw.catalog.Product} Product
+ * @param {dw.catalog.Product} product - Product
  * @returns {JSON} JSON of all the custom properties of product
  */
 function getAllCustomProps(product) {
     var customJSON = {};
-    Object.keys(product.custom).forEach(function(key) {
-       customJSON[key] = this.custom[key].toString();
+    Object.keys(product.custom).forEach(function (key) {
+        customJSON[key] = this.custom[key].toString();
     }, product);
     return JSON.stringify(customJSON);
 }
 
 /**
  * Returns All Variation Attributes
- * @param {dw.catalog.Product} Product
+ * @param {dw.catalog.Product} product - Product
  * @returns {JSON} JSON of all the variation attributes and values of product
  */
 function getAllVariationAttrs(product) {
     var customJSON = {};
     var pvm = product.getVariationModel();
     var variationAttrs = pvm ? pvm.productVariationAttributes : null;
-    if (variationAttrs && ( product.isVariant() || product.isVariationGroup())) {
-        Object.keys(variationAttrs).forEach(function(key) {
+    if (variationAttrs && (product.isVariant() || product.isVariationGroup())) {
+        Object.keys(variationAttrs).forEach(function (key) {
             var varValue = this.getVariationValue(product, variationAttrs[key]);
-            customJSON[variationAttrs[key].attributeID] = varValue ? varValue.displayValue : "";
+            customJSON[variationAttrs[key].attributeID] = varValue ? varValue.displayValue : '';
         }, pvm);
         return JSON.stringify(customJSON);
-    } else if (variationAttrs && product.isMaster()){
-        Object.keys(variationAttrs).forEach(function(index1) {
+    } else if (variationAttrs && product.isMaster()) {
+        Object.keys(variationAttrs).forEach(function (index1) {
             var attrValueArray = [];
-            var attrValues = this.getAllValues(variationAttrs[index1])
-            Object.keys(attrValues).forEach(function(index2){
+            var attrValues = this.getAllValues(variationAttrs[index1]);
+            Object.keys(attrValues).forEach(function (index2) {
                 this.push(attrValues[index2].displayValue);
-            },attrValueArray);
+            }, attrValueArray);
             customJSON[variationAttrs[index1].attributeID] = attrValueArray.join(FConstants.FILE_SEPARATOR);
         }, pvm);
         return JSON.stringify(customJSON);
     }
-    return "";
+    return '';
 }
 
 /**
  * Returns All Product Types
- * @param {dw.catalog.Product} Product
+ * @param {dw.catalog.Product} product - Product
  * @returns {JSON} JSON of all applicable product types of product
  */
 function getAllProductTypes(product) {
     var customJSON = {
-        "bundle"             : product.isBundle(),
-        "master"             : product.isMaster(),
-        "option"             : product.isOptionProduct(),
-        "set"                : product.isProductSet(),
-        "variant"            : product.isVariant(),
-        "variation_group"	 : product.isVariationGroup()
+        bundle: product.isBundle(),
+        master: product.isMaster(),
+        option: product.isOptionProduct(),
+        set: product.isProductSet(),
+        variant: product.isVariant(),
+        variation_group: product.isVariationGroup()
     };
-    customJSON.item = !customJSON.master && !customJSON.variant && !customJSON.set
-                      && !customJSON.bundle && !customJSON.variation_group && !customJSON.option;
+    customJSON.item = !customJSON.master && !customJSON.variant && !customJSON.set &&
+        !customJSON.bundle && !customJSON.variation_group && !customJSON.option;
 
     return JSON.stringify(customJSON);
 }
 
 /**
  * Returns All Product Images
- * @param {dw.catalog.Product} Product
- * @returns {String} all images of product of default type large
+ * @param {dw.catalog.Product} product - Product
+ * @returns {string} all images of product of default type large
  */
 function getAllImages(product) {
     var imageType = FConstants.IMAGE_TYPE;
     var productImageList = product.getImages(imageType);
-    if (productImageList && productImageList.length>0) {
+    if (productImageList && productImageList.length > 0) {
         var imageArray = [];
-        for (var index in productImageList) {
-            imageArray.push(productImageList[index].getAbsURL().toString());
+        var productImageListItr = productImageList.iterator();
+        var count = 0;
+        while (productImageListItr.hasNext()) {
+            var productImage = productImageListItr.next();
+            imageArray.push(productImage.getAbsURL().toString());
             // Push only Top 10 images
-            if (index == 9) {
+            if (count === 9) {
                 break;
             }
+            count++;
         }
         return imageArray.join(FConstants.FILE_SEPARATOR);
     }
-    return "";
+    return '';
 }
 
 /**
  * Return Short and Long Description
- * @param {dw.catalog.Product} Product
+ * @param {dw.catalog.Product} product - Product
  * @returns {JSON} JSON of Short and Long Description
  */
 function getDescription(product) {
     var description = {
-        "short_description" : (product.longDescription ? product.longDescription.toString() : ""),
-        "long_description"  : (product.shortDescription ? product.shortDescription.toString() : "")
-    }
+        short_description: (product.longDescription ? product.longDescription.toString() : ''),
+        long_description: (product.shortDescription ? product.shortDescription.toString() : '')
+    };
     return JSON.stringify(description);
 }
 
 /**
  * Return Online Status
- * @param {dw.catalog.Product} Product
- * @returns {Number} 0 or 1
+ * @param {dw.catalog.Product} product - Product
+ * @returns {number} 0 or 1
  */
 function getOnlineStatus(product) {
     var isOnline = product.online;
@@ -240,41 +241,42 @@ function getOnlineStatus(product) {
 
 /**
  * Return Online Status
- * @param {dw.catalog.Product} Product
- * @returns {Number} 0 or 1
+ * @param {dw.catalog.Product} product - Product
+ * @returns {number} 0 or 1
  */
 function getAvailabilityStatus(product) {
     var avm = product.availabilityModel;
     if (avm) {
-        return avm.isOrderable() ? 1 : 0
+        return avm.isOrderable() ? 1 : 0;
     }
     return 0;
 }
 
 /**
  * Calculate Promo Price
- * @param {dw.catalog.Product} Product
- * @returns {Number} N/A or Price
+ * @param {dw.catalog.Product} product - Product
+ * @returns {number|string} N/A or Price
  */
 function calculatePromoPrice(product) {
     var PromotionMgr = require('dw/campaign/PromotionMgr');
-    var promoPrice = "N/A";
+    var promoPrice = 'N/A';
     var PROMOTION_CLASS_PRODUCT = require('dw/campaign/Promotion').PROMOTION_CLASS_PRODUCT;
     var promotions = PromotionMgr.getActivePromotions().getProductPromotions(product);
     var promoPriceArray = [];
-    if (promotions && promotions.length>0) {
-        for (var index in promotions) {
-            var promo = promotions[index];
-            if (promo.getPromotionClass() != null && promo.getPromotionClass().equals(PROMOTION_CLASS_PRODUCT)
-                && (promo.isBasedOnCustomerGroups() && !promo.basedOnCoupons && !promo.basedOnSourceCodes)) {
+    if (promotions && promotions.length > 0) {
+        var promotionsItr = promotions.iterator();
+        while (promotionsItr.hasNext()) {
+            var promo = promotionsItr.next();
+            if (promo.getPromotionClass() != null && promo.getPromotionClass().equals(PROMOTION_CLASS_PRODUCT) &&
+                (promo.isBasedOnCustomerGroups() && !promo.basedOnCoupons && !promo.basedOnSourceCodes)) {
                 var promoPriceObj = {};
                 var tempPrice = 0;
-                if(product.optionProduct){
+                if (product.optionProduct) {
                     tempPrice = promo.getPromotionalPrice(product, product.getOptionModel());
                 } else {
                     tempPrice = promo.getPromotionalPrice(product);
                 }
-                promoPriceObj[promo.ID] = tempPrice > 0 ? tempPrice : "N/A";
+                promoPriceObj[promo.ID] = tempPrice > 0 ? tempPrice : 'N/A';
                 promoPriceArray.push(promoPriceObj);
             }
         }
@@ -285,18 +287,18 @@ function calculatePromoPrice(product) {
 
 /**
  * Calculate PriceBooks Price
- * @param {dw.catalog.Product} Product
+ * @param {dw.catalog.Product} product - Product
  * @returns {JSON} Price Books Price
  */
 function calculatePriceBookPrices(product) {
-
     var HashMap = require('dw/util/HashMap');
     var priceModel = product.priceModel;
     var priceInfos = priceModel.priceInfos;
     var priceBookMap = new HashMap();
     if (priceInfos) {
-        for (var index in priceInfos) {
-            var priceInfo = priceInfos[index];
+        var priceInfosItr = priceInfos.iterator();
+        while (priceInfosItr.hasNext()) {
+            var priceInfo = priceInfosItr.next();
             var priceBookPrice = {};
             var priceBook = priceInfo.priceBook;
             priceBookPrice[priceBook.ID] = priceInfo.price.value;
@@ -304,7 +306,7 @@ function calculatePriceBookPrices(product) {
             while (priceBook.parentPriceBook) {
                 priceBookPrice = {};
                 priceBook = priceBook.parentPriceBook;
-                priceBookPrice[priceBook.ID] =  priceModel.getPriceBookPrice(priceBook.ID).value;
+                priceBookPrice[priceBook.ID] = priceModel.getPriceBookPrice(priceBook.ID).value;
                 priceBookMap.put(priceBook.ID, priceBookPrice);
             }
         }
@@ -312,16 +314,15 @@ function calculatePriceBookPrices(product) {
     if (priceBookMap.values().length > 0) {
         return JSON.stringify(priceBookMap.values().toArray());
     }
-    return "N/A";
+    return 'N/A';
 }
 
 /**
  * Calculate All PriceBooks Price
- * @param {dw.catalog.Product} Product
+ * @param {dw.catalog.Product} product - Product
  * @returns {JSON} Site ALL Price Books Price
  */
 function calculateAllPriceBooksPrices(product) {
-
     var priceBookMgr = require('dw/catalog/PriceBookMgr');
     var priceModel = product.priceModel;
     var priceBookArray = [];
@@ -329,20 +330,20 @@ function calculateAllPriceBooksPrices(product) {
     while (siteAllPriceBooks.hasNext()) {
         var priceBook = siteAllPriceBooks.next();
         var priceBookPrice = {};
-        priceBookPrice[priceBook.ID] =  priceModel.getPriceBookPrice(priceBook.ID).value;
+        priceBookPrice[priceBook.ID] = priceModel.getPriceBookPrice(priceBook.ID).value;
         priceBookArray.push(priceBookPrice);
     }
-    return priceBookArray.length > 0 ? JSON.stringify(priceBookArray) : "N/A";
+    return priceBookArray.length > 0 ? JSON.stringify(priceBookArray) : 'N/A';
 }
 
 /**
  * Sets locale of the request
- * @param localeID
+ * @param {string} localeID to set
  */
 function setLocale(localeID) {
-    if(localeID){
+    if (localeID) {
         var localeExist = false;
-        var Site = require('dw/system/Site')
+        var Site = require('dw/system/Site');
         var locales = Site.getCurrent().getAllowedLocales().iterator();
         while (locales.hasNext()) {
             var locale = locales.next();
@@ -359,20 +360,20 @@ function setLocale(localeID) {
 }
 
 module.exports = {
-    generateCSVHeader            : generateCSVHeader,
-    getProductImage              : getProductImage,
-    getOnlineSubCats             : getOnlineSubCats,
-    getMasterID                  : getMasterID,
-    getATSValue                  : getATSValue,
-    getAllCustomProps            : getAllCustomProps,
-    getAllVariationAttrs         : getAllVariationAttrs,
-    getAllProductTypes           : getAllProductTypes,
-    getAllImages                 : getAllImages,
-    getDescription               : getDescription,
-    getOnlineStatus              : getOnlineStatus,
-    getAvailabilityStatus        : getAvailabilityStatus,
-    calculatePromoPrice          : calculatePromoPrice,
-    calculatePriceBookPrices     : calculatePriceBookPrices,
-    calculateAllPriceBooksPrices : calculateAllPriceBooksPrices,
-    setLocale                    : setLocale
+    generateCSVHeader: generateCSVHeader,
+    getProductImage: getProductImage,
+    getOnlineSubCats: getOnlineSubCats,
+    getMasterID: getMasterID,
+    getATSValue: getATSValue,
+    getAllCustomProps: getAllCustomProps,
+    getAllVariationAttrs: getAllVariationAttrs,
+    getAllProductTypes: getAllProductTypes,
+    getAllImages: getAllImages,
+    getDescription: getDescription,
+    getOnlineStatus: getOnlineStatus,
+    getAvailabilityStatus: getAvailabilityStatus,
+    calculatePromoPrice: calculatePromoPrice,
+    calculatePriceBookPrices: calculatePriceBookPrices,
+    calculateAllPriceBooksPrices: calculateAllPriceBooksPrices,
+    setLocale: setLocale
 };
