@@ -23,4 +23,4 @@ Product and Inventory Feed export to Feedonomics.It has not any storefront funct
 
 5.You should now be ready to configure the JOBs and export them.
 
-6.Follow the documentation Feedonomics Commerce LINK Integration Documentation present in documentation folder for detailed steps.
+6.Follow the documentation Feedonomics LINK Integration Documentation present in documentation folder for detailed steps.
