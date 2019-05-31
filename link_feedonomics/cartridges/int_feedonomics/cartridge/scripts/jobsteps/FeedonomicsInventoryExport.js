@@ -66,15 +66,14 @@ function writeInventoryExportField(product, csvProductArray, columnValue) {
 
 /**
  * Executed Before Processing of Chunk and Validates all required fields
- * @returns {dw.system.Status} NULL|ERROR
  */
-exports.beforeStep = function () { // eslint-disable-line consistent-return
+exports.beforeStep = function () {
     var args = arguments[0];
 
     var targetFolder = args.TargetFolder;
 
     if (!targetFolder) {
-        return new Status(Status.ERROR, 'ERROR', 'One or more mandatory parameters are missing.');
+        throw new Error('One or more mandatory parameters are missing.');
     }
 
     if (args.SkipMaster) {
@@ -86,7 +85,8 @@ exports.beforeStep = function () { // eslint-disable-line consistent-return
     var fileName = FileUtils.createFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
     var folderFile = new File(File.getRootDirectory(File.IMPEX), targetFolder);
     if (!folderFile.exists() && !folderFile.mkdirs()) {
-        return new Status(Status.ERROR, 'Cannot create IMPEX folders {0}', (File.getRootDirectory(File.IMPEX).fullPath + args.TargetFolder));
+        Logger.info('Cannot create IMPEX folders {0}', (File.getRootDirectory(File.IMPEX).fullPath + targetFolder));
+        throw new Error('Cannot create IMPEX folders.');
     }
     var csvFile = new File(folderFile.fullPath + File.SEPARATOR + fileName);
     fileWriter = new FileWriter(csvFile);
@@ -128,7 +128,7 @@ exports.process = function (product) { // eslint-disable-line consistent-return
         var isMaster = product.isMaster();
         if (!isMaster || skipMaster) {
             var csvProductArray = [];
-            headerColumn.forEach(function (columnValue) { //eslint-disable-line
+            headerColumn.forEach(function (columnValue) { // eslint-disable-line
                 writeInventoryExportField(this, csvProductArray, columnValue);
             }, product);
             return csvProductArray;
@@ -154,7 +154,7 @@ exports.write = function (lines) {
  */
 exports.afterChunk = function () {
     chunks++;
-    Logger.info('Chunk {0} having processed successfully', chunks);
+    Logger.info('Chunk {0} processed successfully', chunks);
 };
 
 /**
@@ -167,7 +167,8 @@ exports.afterStep = function () {
     csvWriter.close();
     fileWriter.close();
     if (processedAll) {
-        return new Status(Status.OK);
+        Logger.info('Export Inventory Feed Successful');
+        return new Status(Status.OK, 'OK', 'Export Inventory Feed Successful');
     }
-    return new Status(Status.ERROR, 'Could not process all the products');
+    throw new Error('Could not process all the products');
 };

@@ -69,6 +69,7 @@
         ],
         "chunk-script-module-step": [{
                 "@type-id":"custom.Feedonomics.ProductExport",
+                "description":"Export Feedonomics Product Feed",
                 "@supports-site-context":"true",
                 "@supports-organization-context":"false",
                 "@supports-parallel-execution":"false",
@@ -112,13 +113,6 @@
                             "@type":"string",
                             "@required":"false",
                             "@trim":"true"
-                        },
-                        {
-                            "@name": "IsDisabled",
-                            "description": "Mark the step as disabled. This will skip the step and returns a OK status",
-                            "@type": "boolean",
-                            "@required":"false",
-                            "@trim":"true"
                         }
                     ]
                 },
@@ -137,6 +131,7 @@
             {
                 "@type-id":"custom.Feedonomics.ProductInventoryExport",
                 "@supports-site-context":true,
+                "description":"Export Feedonomics Inventory Feed",
                 "@supports-organization-context":false,
                 "@supports-parallel-execution":"false",
                 "module":"int_feedonomics/cartridge/scripts/jobsteps/FeedonomicsInventoryExport.js",

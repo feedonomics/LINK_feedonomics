@@ -9,9 +9,7 @@ var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
  * on the assumption that the service is an instance of the dw.src.FTPService class
  *
  * @param {String} serviceID The service to initialize
- *
  * @throw {Error} If the service does not exists in the Business Manager
- *
  * @returns {Object}
  */
 
