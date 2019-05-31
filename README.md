@@ -14,13 +14,15 @@ Product and Inventory Feed export to Feedonomics.It has not any storefront funct
 
 1 Clone this repository.
 
-2 Upload this cartridge to the sandbox.
+2 Upload the cartridge 'int_feedonomics' present in cartridges folder inside the root folder 'link_feedonomics' to the sandbox.
 
-3.Add int_feedonomics` to the Business Manager site path.
+3 For uploading the cartrdige use eclipse or dw.json file present in 'link_feedonomics' folder.
 
-4.Import jobs and services present in metadata folder by zipping the metadata folder.Import the zipped folder in
+4 Add 'int_feedonomics` to the Business Manager site path after uploading.
+
+5 Import jobs and services present in metadata folder by zipping the metadata folder.Import the zipped folder in
   site import export section.
 
-5.You should now be ready to configure the JOBs and export them.
+6 You should now be ready to configure the JOBs and export them.
 
-6.Follow the documentation Feedonomics LINK Integration Documentation present in documentation folder for detailed steps.
+7 Follow the documentation Feedonomics LINK Integration Documentation present in documentation folder for detailed steps.
