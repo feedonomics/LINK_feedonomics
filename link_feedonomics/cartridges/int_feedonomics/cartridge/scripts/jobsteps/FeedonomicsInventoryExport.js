@@ -82,7 +82,7 @@ exports.beforeStep = function () {
 
     var FileWriter = require('dw/io/FileWriter');
     var CSVStreamWriter = require('dw/io/CSVStreamWriter');
-    var fileName = FileUtils.createFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
+    var fileName = FileUtils.createInventoryFeedFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
     var folderFile = new File(File.getRootDirectory(File.IMPEX), targetFolder);
     if (!folderFile.exists() && !folderFile.mkdirs()) {
         Logger.info('Cannot create IMPEX folders {0}', (File.getRootDirectory(File.IMPEX).fullPath + targetFolder));

@@ -18,6 +18,21 @@ function createFileName(fileNamePrefix, fileExtension) {
 }
 
 /**
+ * This Function creates file name with file name prefix
+ * @param {string} fileNamePrefix : e.g . export-inventory
+ * @param {string} fileExtension :e.g. csv or xml
+ * @returns {string} fileName export-inventory_siteID.csv
+ */
+function createInventoryFeedFileName(fileNamePrefix, fileExtension) {
+    var Site = require('dw/system/Site');
+    var siteID = Site.getCurrent().getID();
+    if (!fileExtension) {
+        fileExtension = FConstants.FILE_EXTENSTION.CSV; // eslint-disable-line no-param-reassign
+    }
+    return fileNamePrefix + '_' + siteID + '.' + fileExtension;
+}
+
+/**
  * Loads files from a given directory that match the given pattern
  *
  * @param {string} sourceFolder Directory path to load from
@@ -56,5 +71,6 @@ function getFileExtension(exportFormat) {
 module.exports = {
     createFileName: createFileName,
     getExistingFiles: getExistingFiles,
-    getFileExtension: getFileExtension
+    getFileExtension: getFileExtension,
+    createInventoryFeedFileName: createInventoryFeedFileName
 };
