@@ -60,9 +60,20 @@ var upload = function upload() {
     var isRemoteDirExist = ftpService.call('cd', targetFolderStr);
     // Creating FTP Folder Directory if doesn't exist
     if (!isRemoteDirExist.ok) {
-        Logger.info('folder "{0}" does not exist.Creating the folder', targetFolderStr);
-        ftpService.call('mkdir', targetFolderStr);
-        if (!ftpService.call('cd', targetFolderStr)) {
+        Logger.info('folder {0} does not exist.Creating the folder', targetFolderStr);
+        var directoriesArray = targetFolderStr.substring(0, targetFolderStr.length-1).split(File.SEPARATOR);
+        var dirPath = '';
+        directoriesArray.forEach(function (dir, index) {
+            if (index == 0) {
+                dirPath = dir + File.SEPARATOR;
+            } else {
+                dirPath = dirPath + dir + File.SEPARATOR;
+            }
+            if (!ftpService.call('cd', dirPath).ok) {
+                ftpService.call('mkdir', dirPath);
+            }
+        });
+        if (!ftpService.call('cd', targetFolderStr).ok) {
             throw new Error('Not able to change to target folder.');
         }
     }
