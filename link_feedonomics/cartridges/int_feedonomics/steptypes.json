@@ -108,6 +108,14 @@
                             "default-value":"true"
                         },
                         {
+                            "@name":"AvailableOnly",
+                            "description":"Flag to Include Available Products Only",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
+                        },
+                        {
                             "@name":"LocaleID",
                             "description":"Locale ID otherwise default locale",
                             "@type":"string",
@@ -167,6 +175,14 @@
                             "@required":"false",
                             "@trim":"true",
                             "default-value":"true"
+                        },
+                        {
+                            "@name":"AvailableOnly",
+                            "description":"Flag to Include Available Products Only",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
                         }
                     ]
                 },

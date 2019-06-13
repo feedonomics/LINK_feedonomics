@@ -16,6 +16,7 @@ var csvWriter;
 var chunks = 0;
 var processedAll = true;
 var skipMaster = false;
+var availableOnly = false;
 
 /**
  * Adds the column value to the CSV line Array of Inventory Feed export CSV file
@@ -80,6 +81,10 @@ exports.beforeStep = function () {
         skipMaster = args.SkipMaster;
     }
 
+    if (args.AvailableOnly) {
+        availableOnly = args.AvailableOnly;
+    }
+
     var FileWriter = require('dw/io/FileWriter');
     var CSVStreamWriter = require('dw/io/CSVStreamWriter');
     var fileName = FileUtils.createInventoryFeedFileName((args.FileNamePrefix || FConstants.FILE_NAME.INVENTORY));
@@ -125,8 +130,7 @@ exports.read = function () { // eslint-disable-line consistent-return
  */
 exports.process = function (product) { // eslint-disable-line consistent-return
     try {
-        var isMaster = product.isMaster();
-        if (!isMaster || skipMaster) {
+        if ((!skipMaster || !product.isMaster()) && (!availableOnly || FeedonomicsHelpers.getAvailabilityStatus(product))) {
             var csvProductArray = [];
             headerColumn.forEach(function (columnValue) { // eslint-disable-line
                 writeInventoryExportField(this, csvProductArray, columnValue);
