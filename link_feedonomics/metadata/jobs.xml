@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
-
     <job job-id="FeedonomicsProductExport" priority="0">
         <description/>
         <parameters/>
@@ -12,6 +11,7 @@
                     <parameter name="TargetFolder">src/feedonomics/catalog</parameter>
                     <parameter name="FileNamePrefix">export-catalog</parameter>
                     <parameter name="SkipMaster">true</parameter>
+                    <parameter name="AvailableOnly">false</parameter>
                 </parameters>
                 <rules>
                     <on-exit status="ERROR">
@@ -28,17 +28,22 @@
                     <parameter name="ServiceID">feedonomics.ftp</parameter>
                     <parameter name="FilePattern">.*\.csv</parameter>
                     <parameter name="SourceFolder">src/feedonomics/catalog</parameter>
-                    <parameter name="TargetFolder">src/feedonomics/catalog</parameter>
-                    <parameter name="ArchiveFolder">src/archive/feedonomics</parameter>
+                    <parameter name="TargetFolder">incoming/src/feedonomics/catalog</parameter>
+                    <parameter name="ArchiveFolder">incoming/src/feedonomics/catalog</parameter>
                     <parameter name="IsDisabled">false</parameter>
                 </parameters>
             </step>
         </flow>
+        <rules/>
         <triggers>
-            <run-once enabled="false">
-                <date>2019-05-24Z</date>
-                <time>10:03:04.000Z</time>
-            </run-once>
+            <run-recurring enabled="false">
+                <recurrence>
+                    <date-from>2019-06-12Z</date-from>
+                    <start-time>18:33:47.000Z</start-time>
+                    <interval>12M</interval>
+                    <day-of-week/>
+                </recurrence>
+            </run-recurring>
         </triggers>
     </job>
 
@@ -53,6 +58,7 @@
                     <parameter name="TargetFolder">src/feedonomics/inventory</parameter>
                     <parameter name="FileNamePrefix">export-inventory</parameter>
                     <parameter name="SkipMaster">true</parameter>
+                    <parameter name="AvailableOnly">false</parameter>
                 </parameters>
                 <rules>
                     <on-exit status="ERROR">
@@ -70,7 +76,7 @@
                     <parameter name="FilePattern">.*\.csv</parameter>
                     <parameter name="SourceFolder">src/feedonomics/inventory</parameter>
                     <parameter name="TargetFolder">src/feedonomics/inventory</parameter>
-                    <parameter name="ArchiveFolder">src/archive/feedonomics</parameter>
+                    <parameter name="ArchiveFolder">src/feedonomics/inventory</parameter>
                     <parameter name="IsDisabled">false</parameter>
                 </parameters>
             </step>
