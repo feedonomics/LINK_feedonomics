@@ -3,7 +3,7 @@
         "script-module-step": [{
                 "@type-id":"custom.Feedonomics.FtpUpload",
                 "description":"Upload files to an (S)FTP server",
-                "module":"int_feedonomics/cartridge/scripts/jobsteps/FtpUpload.js",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/ftpUpload.js",
                 "function":"Upload",
                 "parameters": {
                     "parameters": [{
@@ -73,7 +73,7 @@
                 "@supports-site-context":"true",
                 "@supports-organization-context":"false",
                 "@supports-parallel-execution":"false",
-                "module":"int_feedonomics/cartridge/scripts/jobsteps/FeedonomicsProductExport.js",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/feedonomicsProductExport.js",
                 "before-step-function":"beforeStep",
                 "total-count-function":"getTotalCount",
                 "read-function":"read",
@@ -81,7 +81,7 @@
                 "after-chunk-function":"afterChunk",
                 "write-function":"write",
                 "after-step-function":"afterStep",
-                "chunk-size":10000,
+                "chunk-size":1000,
                 "parameters": {
                     "parameters": [{
                             "@name":"TargetFolder",
@@ -121,6 +121,13 @@
                             "@type":"string",
                             "@required":"false",
                             "@trim":"true"
+                        },
+                        {
+                            "@name":"ImageViewTypes",
+                            "description":"Product Image View Type(s)",
+                            "@type":"string",
+                            "@required":"false",
+                            "@trim":"true"
                         }
                     ]
                 },
@@ -142,7 +149,7 @@
                 "description":"Export Feedonomics Inventory Feed",
                 "@supports-organization-context":false,
                 "@supports-parallel-execution":"false",
-                "module":"int_feedonomics/cartridge/scripts/jobsteps/FeedonomicsInventoryExport.js",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/feedonomicsInventoryExport.js",
                 "before-step-function":"beforeStep",
                 "total-count-function":"getTotalCount",
                 "read-function":"read",
@@ -150,7 +157,7 @@
                 "write-function":"write",
                 "after-step-function":"afterStep",
                 "after-chunk-function":"afterChunk",
-                "chunk-size":10000,
+                "chunk-size":1000,
                 "parameters": {
                     "parameters": [{
                             "@name":"TargetFolder",

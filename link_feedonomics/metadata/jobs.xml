@@ -29,7 +29,7 @@
                     <parameter name="FilePattern">.*\.csv</parameter>
                     <parameter name="SourceFolder">src/feedonomics/catalog</parameter>
                     <parameter name="TargetFolder">incoming/src/feedonomics/catalog</parameter>
-                    <parameter name="ArchiveFolder">incoming/src/feedonomics/catalog</parameter>
+                    <parameter name="ArchiveFolder">src/archive/feedonomics/catalog</parameter>
                     <parameter name="IsDisabled">false</parameter>
                 </parameters>
             </step>
@@ -40,7 +40,7 @@
                 <recurrence>
                     <date-from>2019-06-12Z</date-from>
                     <start-time>18:33:47.000Z</start-time>
-                    <interval>12M</interval>
+                    <interval>12h</interval>
                     <day-of-week/>
                 </recurrence>
             </run-recurring>
@@ -75,8 +75,8 @@
                     <parameter name="ServiceID">feedonomics.ftp</parameter>
                     <parameter name="FilePattern">.*\.csv</parameter>
                     <parameter name="SourceFolder">src/feedonomics/inventory</parameter>
-                    <parameter name="TargetFolder">src/feedonomics/inventory</parameter>
-                    <parameter name="ArchiveFolder">src/feedonomics/inventory</parameter>
+                    <parameter name="TargetFolder">incoming/src/feedonomics/inventory</parameter>
+                    <parameter name="ArchiveFolder">src/archive/feedonomics/inventory</parameter>
                     <parameter name="IsDisabled">false</parameter>
                 </parameters>
             </step>
@@ -86,7 +86,6 @@
             <run-recurring enabled="false">
                 <recurrence>
                     <date-from>2019-05-30Z</date-from>
-                    <date-to>2019-06-30Z</date-to>
                     <start-time>04:00:00.000Z</start-time>
                     <interval>12h</interval>
                     <day-of-week/>
