@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
+    <job job-id="FeedonomicsProductExport" priority="0">
+        <description/>
+        <parameters/>
+        <flow>
+            <context site-id="RefArchGlobal"/>
+            <step step-id="ExportProducts" type="custom.Feedonomics.ProductExport" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="TargetFolder">src/feedonomics/catalog</parameter>
+                    <parameter name="FileNamePrefix">export-catalog</parameter>
+                    <parameter name="SkipMaster">true</parameter>
+                    <parameter name="AvailableOnly">false</parameter>
+                </parameters>
+                <rules>
+                    <on-exit status="ERROR">
+                        <continue/>
+                    </on-exit>
+                </rules>
+            </step>
+        </flow>
+        <flow>
+            <context site-id="Sites"/>
+            <step step-id="FTPUpload" type="custom.Feedonomics.FtpUpload" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ServiceID">feedonomics.ftp</parameter>
+                    <parameter name="FilePattern">.*\.csv</parameter>
+                    <parameter name="SourceFolder">src/feedonomics/catalog</parameter>
+                    <parameter name="TargetFolder">incoming/src/feedonomics/catalog</parameter>
+                    <parameter name="ArchiveFolder">src/archive/feedonomics/catalog</parameter>
+                    <parameter name="IsDisabled">false</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-recurring enabled="false">
+                <recurrence>
+                    <date-from>2019-06-12Z</date-from>
+                    <start-time>18:33:47.000Z</start-time>
+                    <interval>12h</interval>
+                    <day-of-week/>
+                </recurrence>
+            </run-recurring>
+        </triggers>
+    </job>
+
+    <job job-id="FeedonomicsProductInventoryExport" priority="0">
+        <description/>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="ExportInventory" type="custom.Feedonomics.ProductInventoryExport" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="TargetFolder">src/feedonomics/inventory</parameter>
+                    <parameter name="FileNamePrefix">export-inventory</parameter>
+                    <parameter name="SkipMaster">true</parameter>
+                    <parameter name="AvailableOnly">false</parameter>
+                </parameters>
+                <rules>
+                    <on-exit status="ERROR">
+                        <continue/>
+                    </on-exit>
+                </rules>
+            </step>
+        </flow>
+        <flow>
+            <context site-id="Sites"/>
+            <step step-id="FtpUpload" type="custom.Feedonomics.FtpUpload" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ServiceID">feedonomics.ftp</parameter>
+                    <parameter name="FilePattern">.*\.csv</parameter>
+                    <parameter name="SourceFolder">src/feedonomics/inventory</parameter>
+                    <parameter name="TargetFolder">incoming/src/feedonomics/inventory</parameter>
+                    <parameter name="ArchiveFolder">src/archive/feedonomics/inventory</parameter>
+                    <parameter name="IsDisabled">false</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-recurring enabled="false">
+                <recurrence>
+                    <date-from>2019-05-30Z</date-from>
+                    <start-time>04:00:00.000Z</start-time>
+                    <interval>12h</interval>
+                    <day-of-week/>
+                </recurrence>
+            </run-recurring>
+        </triggers>
+    </job>
+
+</jobs>
