@@ -1,0 +1,226 @@
+{
+    "step-types": {
+        "script-module-step": [{
+                "@type-id":"custom.Feedonomics.FtpUpload",
+                "description":"Upload files to an (S)FTP server",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/ftpUpload.js",
+                "function":"Upload",
+                "parameters": {
+                    "parameters": [{
+                            "@name":"ServiceID",
+                            "@type":"string",
+                            "@required":"true",
+                            "@trim":"true",
+                            "default-value":"feedonomics.ftp"
+                        },
+                        {
+                            "@name":"FilePattern",
+                            "@type":"string",
+                            "@required":"false",
+                            "description":"File pattern (Regular Expression)",
+                            "@trim":"true",
+                            "default-value":".*\\.csv"
+                        },
+                        {
+                            "@name":"SourceFolder",
+                            "@type":"string",
+                            "@required":"true",
+                            "@trim":"true",
+                            "description":"Local folder with files, relative to IMPEX/",
+                            "default-value":"src/feedonomics/catalog"
+                        },
+                        {
+                            "@name":"TargetFolder",
+                            "@type":"string",
+                            "@required":"true",
+                            "description":"Remote folder on Server, relative to home directory",
+                            "@trim":"true"
+                        },
+                        {
+                            "@name":"ArchiveFolder",
+                            "@type":"string",
+                            "@required":"false",
+                            "description":"Local folder where to archive files, relative to IMPEX/",
+                            "@trim":"true",
+                            "default-value":"src/archive/feedonomics"
+                        },
+                        {
+                            "@name":"IsDisabled",
+                            "description":"Mark the step as disabled. This will skip the step and returns a OK status",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code":"ERROR",
+                            "description":"Used when an error occurred."
+                        },
+                        {
+                            "@code":"OK",
+                            "description":"Used when everything went well."
+                        }
+                    ]
+                }
+            }
+        ],
+        "chunk-script-module-step": [{
+                "@type-id":"custom.Feedonomics.ProductExport",
+                "description":"Export Feedonomics Product Feed",
+                "@supports-site-context":"true",
+                "@supports-organization-context":"false",
+                "@supports-parallel-execution":"false",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/feedonomicsProductExport.js",
+                "before-step-function":"beforeStep",
+                "total-count-function":"getTotalCount",
+                "read-function":"read",
+                "process-function":"process",
+                "after-chunk-function":"afterChunk",
+                "write-function":"write",
+                "after-step-function":"afterStep",
+                "chunk-size":1000,
+                "parameters": {
+                    "parameters": [{
+                            "@name":"TargetFolder",
+                            "@type":"string",
+                            "@required":"true",
+                            "@trim":"true",
+                            "description":"Target folder path (in IMPEX)",
+                            "default-value":"src/feedonomics/catalog"
+                        },
+                        {
+                            "@name":"FileNamePrefix",
+                            "description":"Filename prefix of the generated files that will contain exported data",
+                            "@type":"string",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"export-catalog"
+                        },
+                        {
+                            "@name":"SkipMaster",
+                            "description":"Flag to Skip Master Products",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"true"
+                        },
+                        {
+                            "@name":"AvailableOnly",
+                            "description":"Flag to Include Available Products Only",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
+                        },
+                        {
+                            "@name":"OnlineOnly",
+                            "description":"Flag to Include Online Products Only",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
+                        },
+                        {
+                            "@name":"LocaleID",
+                            "description":"Locale ID otherwise default locale",
+                            "@type":"string",
+                            "@required":"false",
+                            "@trim":"true"
+                        },
+                        {
+                            "@name":"ImageViewTypes",
+                            "description":"Product Image View Type(s)",
+                            "@type":"string",
+                            "@required":"false",
+                            "@trim":"true"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code":"ERROR",
+                            "description":"Used when an error occurred."
+                        },
+                        {
+                            "@code":"OK",
+                            "description":"Used when everything went well."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id":"custom.Feedonomics.ProductInventoryExport",
+                "@supports-site-context":true,
+                "description":"Export Feedonomics Inventory Feed",
+                "@supports-organization-context":false,
+                "@supports-parallel-execution":"false",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/feedonomicsInventoryExport.js",
+                "before-step-function":"beforeStep",
+                "total-count-function":"getTotalCount",
+                "read-function":"read",
+                "process-function":"process",
+                "write-function":"write",
+                "after-step-function":"afterStep",
+                "after-chunk-function":"afterChunk",
+                "chunk-size":1000,
+                "parameters": {
+                    "parameters": [{
+                            "@name":"TargetFolder",
+                            "@type":"string",
+                            "@required":"true",
+                            "@trim":"true",
+                            "description":"Target folder path (in IMPEX)",
+                            "default-value":"src/feedonomics/inventory"
+                        },
+                        {
+                            "@name":"FileNamePrefix",
+                            "description":"Filename prefix of the generated files that will contain exported data",
+                            "@type":"string",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"export-inventory"
+                        },
+                        {
+                            "@name":"SkipMaster",
+                            "description":"Flag to Skip Master Products",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"true"
+                        },
+                        {
+                            "@name":"AvailableOnly",
+                            "description":"Flag to Include Available Products Only",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
+                        },
+                        {
+                            "@name":"OnlineOnly",
+                            "description":"Flag to Include Online Products Only",
+                            "@type":"boolean",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"false"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code": "ERROR",
+                            "description": "Used when an error occurred."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when everything went well."
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
