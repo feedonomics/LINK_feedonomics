@@ -20,6 +20,7 @@ var HEADER_VALUES = {
     PRICE: 'price',
     BOOKPRICE: 'book_price',
     PROMOPRICE: 'promo_price',
+    LEASTPROMOPRICE: 'least_promo_price',
     INVENTORY: 'inventory',
     IN_STOCK: 'in_stock',
     PREORDER_BACKORDER_ALLOCATION: 'preorder_backorder_allocation',
