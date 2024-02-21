@@ -85,9 +85,13 @@ function writeProductExportField(product, csvProductArray, columnValue) {
         case FConstants.HEADER_VALUES.BOOKPRICE:
             csvProductArray.push(FeedonomicsHelpers.calculateAllPriceBooksPrices(product));
             break;
-        // ProductName
+        // Product Promotional Prices Array
         case FConstants.HEADER_VALUES.PROMOPRICE:
             csvProductArray.push(FeedonomicsHelpers.calculatePromoPrice(product));
+            break;
+        // Product Least Promotional Price Object
+        case FConstants.HEADER_VALUES.LEASTPROMOPRICE:
+            csvProductArray.push(FeedonomicsHelpers.calculateLeastPromoPrice(product));
             break;
         // Product's In Stock Status
         case FConstants.HEADER_VALUES.IN_STOCK:

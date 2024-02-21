@@ -28,6 +28,7 @@ function generateCSVHeader(exportType) {
         csvHeaderArray.push(FConstants.HEADER_VALUES.PRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.BOOKPRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.PROMOPRICE);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.LEASTPROMOPRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.INVENTORY);
         csvHeaderArray.push(FConstants.HEADER_VALUES.IN_STOCK);
         csvHeaderArray.push(FConstants.HEADER_VALUES.PREORDER_BACKORDER_ALLOCATION);
@@ -47,6 +48,7 @@ function generateCSVHeader(exportType) {
         csvHeaderArray.push(FConstants.HEADER_VALUES.PRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.BOOKPRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.PROMOPRICE);
+        csvHeaderArray.push(FConstants.HEADER_VALUES.LEASTPROMOPRICE);
         csvHeaderArray.push(FConstants.HEADER_VALUES.INVENTORY);
         csvHeaderArray.push(FConstants.HEADER_VALUES.IN_STOCK);
         csvHeaderArray.push(FConstants.HEADER_VALUES.PREORDER_BACKORDER_ALLOCATION);
@@ -432,6 +434,8 @@ function getInStockDate(product) {
  */
 function calculatePromoPrice(product) {
     var PromotionMgr = require('dw/campaign/PromotionMgr');
+    var Transaction = require('dw/system/Transaction');
+    var Coupon = require('dw/campaign/Coupon');
     var promoPrice = 'N/A';
     var PROMOTION_CLASS_PRODUCT = require('dw/campaign/Promotion').PROMOTION_CLASS_PRODUCT;
     var promotions = PromotionMgr.getActivePromotions().getProductPromotions(product);
@@ -440,22 +444,83 @@ function calculatePromoPrice(product) {
         var promotionsItr = promotions.iterator();
         while (promotionsItr.hasNext()) {
             var promo = promotionsItr.next();
-            if (promo.getPromotionClass() != null && promo.getPromotionClass().equals(PROMOTION_CLASS_PRODUCT) &&
-                (promo.isBasedOnCustomerGroups() && !promo.basedOnCoupons && !promo.basedOnSourceCodes)) {
+            if (promo.getPromotionClass() != null && promo.getPromotionClass().equals(PROMOTION_CLASS_PRODUCT)) {
                 var promoPriceObj = {};
+                promoPriceObj.PromotionID = promo.ID;
+                promoPriceObj.PromotionBasedOnCoupon = promo.basedOnCoupons;
+                promoPriceObj.PromotionBasedOnSourceCode = promo.basedOnSourceCodes;
+
+                /* Promotional Price Start */
                 var tempPrice = 0;
                 if (product.optionProduct) {
                     tempPrice = promo.getPromotionalPrice(product, product.getOptionModel());
                 } else {
                     tempPrice = promo.getPromotionalPrice(product);
                 }
-                promoPriceObj[promo.ID] = tempPrice.available ? require('dw/util/StringUtils').formatMoney(tempPrice) : 'N/A';
+
+                promoPriceObj.promotion_amount = tempPrice.available ? require('dw/util/StringUtils').formatMoney(tempPrice) : 'N/A';
+                promoPriceObj.promotion_value = tempPrice.available ? tempPrice.value : 'N/A';
+
+                /* Promotional Price End */
+
+                /*  Callout Msg Start */
+                var calloutMsg = promo.calloutMsg;
+                promoPriceObj.PromotionCalloutMsg = calloutMsg && calloutMsg.toString();
+                /*  Callout Msg End */
+
+                /*  Coupons Start */
+                promoPriceObj.CouponRedemptionCode = '';
+                if (promo.basedOnCoupons && !promo.coupons.empty) {
+                    var couponItr = promo.coupons.iterator();
+                    while (couponItr.hasNext()) {
+                        var coupon = couponItr.next();
+                        if (coupon.type === Coupon.TYPE_SINGLE_CODE) {
+                            var couponRedemptionCode = '';
+                            Transaction.wrap(function () { // eslint-disable-line no-loop-func
+                                couponRedemptionCode = coupon.nextCouponCode;
+                            });
+                            promoPriceObj.CouponRedemptionCode = couponRedemptionCode;
+                            break;
+                        }
+                    }
+                }
+                /*  Coupons End */
+
+                /* Campaign Dates Start*/
+                var campaignStartDate = promo.campaign.startDate;
+                var campaignEndDate = promo.campaign.endDate;
+                promoPriceObj.PromotionStartDate = campaignStartDate ? campaignStartDate.toDateString() : '';
+                promoPriceObj.PromotionEndDate = campaignEndDate ? campaignEndDate.toDateString() : '';
+                /* Campaign Dates End*/
+
                 promoPriceArray.push(promoPriceObj);
             }
         }
         return promoPriceArray.length > 0 ? JSON.stringify(promoPriceArray) : promoPrice;
     }
     return promoPrice;
+}
+
+/**
+ * Calculate Least Promo Price
+ * @param {dw.catalog.Product} product - Product
+ * @returns {number|string} N/A or Price
+ */
+function calculateLeastPromoPrice(product) {
+    var promoPrice = calculatePromoPrice(product);
+    if (promoPrice === 'N/A') {
+        return 'N/A';
+    }
+
+    promoPrice = JSON.parse(promoPrice);
+
+    var sortedPromoPriceArray = promoPrice.filter(function (item) {
+        return item.promotion_value !== 'N/A';
+    }).sort(function (item1, item2) {
+        return item1.promotion_value > item2.promotion_value;
+    });
+
+    return sortedPromoPriceArray.length > 0 ? JSON.stringify(sortedPromoPriceArray) : 'N/A';
 }
 
 /**
@@ -563,6 +628,7 @@ module.exports = {
     getAvailabilityStatus: getAvailabilityStatus,
     getInStockDate: getInStockDate,
     calculatePromoPrice: calculatePromoPrice,
+    calculateLeastPromoPrice: calculateLeastPromoPrice,
     calculatePriceBookPrices: calculatePriceBookPrices,
     calculateAllPriceBooksPrices: calculateAllPriceBooksPrices,
     setLocale: setLocale,

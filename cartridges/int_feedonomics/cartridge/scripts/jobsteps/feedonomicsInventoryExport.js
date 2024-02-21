@@ -48,6 +48,10 @@ function writeInventoryExportField(product, csvProductArray, columnValue) {
         case FConstants.HEADER_VALUES.PROMOPRICE:
             csvProductArray.push(FeedonomicsHelpers.calculatePromoPrice(product));
             break;
+        // Product Least Promotional Price Object
+        case FConstants.HEADER_VALUES.LEASTPROMOPRICE:
+            csvProductArray.push(FeedonomicsHelpers.calculateLeastPromoPrice(product));
+            break;
         // Product's In Stock
         case FConstants.HEADER_VALUES.IN_STOCK:
             csvProductArray.push(FeedonomicsHelpers.isOrderable(product));
