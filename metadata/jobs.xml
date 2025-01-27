@@ -94,4 +94,61 @@
         </triggers>
     </job>
 
+    <job job-id="FeedonomicsExportPromotions">
+        <description/>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="FeedonomicsExportPromotions" type="ExportPromotions" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="OverwriteExportFile">true</parameter>
+                    <parameter name="ExportFile">feedonomics/promotions/export-promotions</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="FeedonomicsExportCoupons" type="ExportCoupons" enforce-restart="false">
+                <description>This step will export all system coupons. We will export only single code coupons to feedonomics in next step.</description>
+                <parameters>
+                    <parameter name="ExportFile">feedonomics/promotions/temp/export-coupons</parameter>
+                    <parameter name="OverwriteExportFile">true</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="GenerateCouponCodeFile" type="custom.Feedonomics.GenerateCouponCodeFile" enforce-restart="false">
+                <description>This step will create a new file by parsing system generated coupon file. It will also delete the system generated file.</description>
+                <parameters>
+                    <parameter name="SourceFolder">src/feedonomics/promotions/temp</parameter>
+                    <parameter name="TargetFolder">src/feedonomics/promotions</parameter>
+                    <parameter name="FileName">export-coupons.xml</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <flow>
+            <context site-id="Sites"/>
+            <step step-id="FtpUpload" type="custom.Feedonomics.FtpUpload" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ServiceID">feedonomics.ftp</parameter>
+                    <parameter name="FilePattern">.*\.xml</parameter>
+                    <parameter name="SourceFolder">src/feedonomics/promotions</parameter>
+                    <parameter name="TargetFolder">incoming/src/feedonomics/promotions</parameter>
+                    <parameter name="ArchiveFolder">src/archive/feedonomics/promotions</parameter>
+                    <parameter name="IsDisabled">false</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-once enabled="false">
+                <date>2024-10-09Z</date>
+                <time>04:19:00.000Z</time>
+            </run-once>
+        </triggers>
+    </job>
+
 </jobs>

@@ -1,3 +1,5 @@
+'use strict';
+
 var File = require('dw/io/File');
 var FConstants = require('~/cartridge/scripts/util/feedonomicsConstants');
 
@@ -68,9 +70,35 @@ function getFileExtension(exportFormat) {
     return FConstants.FILE_EXTENSTION.CSV;
 }
 
+/**
+ * @desc Remove all files and sub folders
+ * @param {dw.io.File} sourceFolder - Clear Source Folder Files
+ */
+function removeFilesFromFolder(sourceFolder) {
+    if (!sourceFolder.exists()) {
+        return;
+    }
+    var filesList = sourceFolder.listFiles(function (file) {
+        return file.exists();
+    });
+    var filesIterator = filesList.iterator();
+
+    while (filesIterator.hasNext()) {
+        var file = filesIterator.next();
+
+        if (file.file) {
+            file.remove();
+        } else if (file.directory) {
+            removeFilesFromFolder(file);
+            file.remove();
+        }
+    }
+}
+
 module.exports = {
     createFileName: createFileName,
     getExistingFiles: getExistingFiles,
     getFileExtension: getFileExtension,
-    createInventoryFeedFileName: createInventoryFeedFileName
+    createInventoryFeedFileName: createInventoryFeedFileName,
+    removeFilesFromFolder: removeFilesFromFolder
 };

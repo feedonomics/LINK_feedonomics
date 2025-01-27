@@ -1,4 +1,7 @@
 /* Feedonomics Inventory Export Job */
+
+/* eslint-disable no-plusplus */
+
 'use strict';
 
 var Logger = require('dw/system/Logger');

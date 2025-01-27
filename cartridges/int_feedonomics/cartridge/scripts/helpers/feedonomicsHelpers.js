@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-plusplus */
+
 var FConstants = require('~/cartridge/scripts/util/feedonomicsConstants');
 var enumValue = require('dw/value/EnumValue');
 var MarkupText = require('dw/content/MarkupText');
@@ -106,7 +108,9 @@ function getPrimaryCategory(product) {
     var primaryCat = product.primaryCategory;
     if (primaryCat) {
         return primaryCat.displayName;
-    } else if (product.isVariant()) {
+    }
+
+    if (product.isVariant()) {
         var pvm = product.variationModel;
         if (pvm) {
             var masterProduct = pvm.getMaster();
@@ -168,9 +172,13 @@ function getMasterID(product) {
 function getCustomValues(customObj) {
     if (customObj instanceof enumValue || customObj instanceof MarkupText) { // Enum of strings display value only.
         return customObj.toString();
-    } else if (customObj instanceof MediaFile) {
+    }
+
+    if (customObj instanceof MediaFile) {
         return customObj.absURL.toString();
-    } else if (Object.keys(customObj).length > 0) {
+    }
+
+    if (Object.keys(customObj).length > 0) {
         var arr = [];
         Object.keys(customObj).forEach(function (key) {
             if (typeof customObj[key] !== 'function' && customObj.hasOwnProperty(key)) { // eslint-disable-line no-prototype-builtins
@@ -179,6 +187,7 @@ function getCustomValues(customObj) {
         });
         return arr;
     }
+
     return customObj.toString();
 }
 
@@ -218,7 +227,8 @@ function getAllVariationAttrs(product) {
             customJSON[variationAttrs[key].attributeID] = varValue ? varValue.displayValue : '';
         }, pvm);
         return JSON.stringify(customJSON);
-    } else if (variationAttrs && product.isMaster()) {
+    }
+    if (variationAttrs && product.isMaster()) {
         Object.keys(variationAttrs).forEach(function (index1) {
             var attrValueArray = [];
             var attrValues = this.getAllValues(variationAttrs[index1]);
@@ -247,8 +257,8 @@ function getAllProductTypes(product) {
         variant: product.isVariant(),
         variation_group: product.isVariationGroup()
     };
-    customJSON.item = !customJSON.master && !customJSON.variant && !customJSON.set &&
-        !customJSON.bundle && !customJSON.variation_group && !customJSON.option && !customJSON.bundled;
+    customJSON.item = !customJSON.master && !customJSON.variant && !customJSON.set
+                      && !customJSON.bundle && !customJSON.variation_group && !customJSON.option && !customJSON.bundled;
 
     return JSON.stringify(customJSON);
 }
@@ -406,7 +416,9 @@ function getATSValue(product) {
         var inventoryRecord = avm.inventoryRecord;
         if (inventoryRecord && inventoryRecord.perpetual) {
             return 999999;
-        } else if (inventoryRecord && inventoryRecord.ATS) {
+        }
+
+        if (inventoryRecord && inventoryRecord.ATS) {
             return inventoryRecord.ATS.value;
         }
     }
@@ -486,12 +498,12 @@ function calculatePromoPrice(product) {
                 }
                 /*  Coupons End */
 
-                /* Campaign Dates Start*/
+                /* Campaign Dates Start */
                 var campaignStartDate = promo.campaign.startDate;
                 var campaignEndDate = promo.campaign.endDate;
                 promoPriceObj.PromotionStartDate = campaignStartDate ? campaignStartDate.toDateString() : '';
                 promoPriceObj.PromotionEndDate = campaignEndDate ? campaignEndDate.toDateString() : '';
-                /* Campaign Dates End*/
+                /* Campaign Dates End */
 
                 promoPriceArray.push(promoPriceObj);
             }

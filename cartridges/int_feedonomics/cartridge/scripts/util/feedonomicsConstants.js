@@ -40,7 +40,8 @@ var HEADER_VALUES = {
 
 var FILE_NAME = {
     CATALOG: 'export-catalog',
-    INVENTORY: 'export-inventory'
+    INVENTORY: 'export-inventory',
+    COUPONS: 'export-coupons'
 };
 
 var FILE_EXTENSTION = {
@@ -55,6 +56,7 @@ var IMAGE_TYPES = {
 };
 
 var FILE_SEPARATOR = ',';
+var XML_NAMESPACE_COUPONS = 'http://www.demandware.com/xml/impex/coupon/2008-06-17';
 
 module.exports = {
     EXPORT_TYPE: EXPORT_TYPE,
@@ -62,5 +64,6 @@ module.exports = {
     FILE_NAME: FILE_NAME,
     FILE_EXTENSTION: FILE_EXTENSTION,
     IMAGE_TYPES: IMAGE_TYPES,
-    FILE_SEPARATOR: FILE_SEPARATOR
+    FILE_SEPARATOR: FILE_SEPARATOR,
+    XML_NAMESPACE_COUPONS: XML_NAMESPACE_COUPONS
 };

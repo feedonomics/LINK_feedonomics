@@ -65,6 +65,53 @@
                         }
                     ]
                 }
+            },
+            {
+                "@type-id":"custom.Feedonomics.GenerateCouponCodeFile",
+                "@supports-site-context":true,
+                "description":"Export Feedonomics Coupon Feed",
+                "@supports-organization-context":false,
+                "@supports-parallel-execution":"false",
+                "module":"int_feedonomics/cartridge/scripts/jobsteps/feedonomicsGenerateCouponCodeFile.js",
+                "function":"execute",
+                "parameters": {
+                    "parameters": [{
+                            "@name":"SourceFolder",
+                            "@type":"string",
+                            "@required":"true",
+                            "@trim":"true",
+                            "description":"Source folder path (in IMPEX)",
+                            "default-value":"src/feedonomics/promotions/temp"
+                        },
+                        {
+                            "@name":"TargetFolder",
+                            "@type":"string",
+                            "@required":"true",
+                            "@trim":"true",
+                            "description":"Target folder path (in IMPEX)",
+                            "default-value":"src/feedonomics/promotions"
+                        },
+                        {
+                            "@name":"FileName",
+                            "description":"Filename of the generated coupon files that will contain exported data",
+                            "@type":"string",
+                            "@required":"false",
+                            "@trim":"true",
+                            "default-value":"export-coupons.xml"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [{
+                            "@code": "ERROR",
+                            "description": "Used when an error occurred."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when everything went well."
+                        }
+                    ]
+                }
             }
         ],
         "chunk-script-module-step": [{
